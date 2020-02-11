@@ -1,0 +1,1 @@
+Have two pointers on both ends that creep towards each other and check each character. If not use recursion
