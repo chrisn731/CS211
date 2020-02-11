@@ -10,7 +10,7 @@ int compresslength(char* input) {
 	int length = 0;
 	while(letter != '\0') {
 
-		if( (letter >= 47 && letter <= 57) ) return -1;
+		if( (letter >= 48 && letter <= 57) ) return -1;
 
 		if( (letter != input[i]) ) {
 			//Every part of the output string is going to have (letter)(number). If the letter count > 10, use the / 10 to increase length of output string.
@@ -23,38 +23,34 @@ int compresslength(char* input) {
 			inputsize++;
 		}
 	}
- 
+	inputsize--;
 	if(length > inputsize) return 0;
 	return length;
 }
 
 
-char *compress(char *output, char *input) {
+int compress(char *input) {
 	
 	char currletter = input[0];
 	char scanletter = input[0];
 	int charcounter = 0;
 	int inindex = 0;
-	int outindex = 0;
 	
-	while(currletter != '\0') {
-
-		if(currletter != scanletter) {
-			output[outindex] = currletter;
-			outindex++;
-			sprintf((output+outindex),"%i",charcounter);
-			outindex += 1 + (charcounter / 10);
-			currletter = input[inindex];
-			charcounter = 1;
+	while(scanletter != '\0') {
+		if(scanletter != currletter) {
+			printf("%c%i",currletter,charcounter);
+			currletter = scanletter;
+			charcounter = 0;	
 		} else {
-			charcounter++;
 			inindex++;
+			charcounter++;
+			scanletter = input[inindex];
+
 		}
 	}
+	printf("%c%i\n",currletter, charcounter);
 	
-	output[outindex] = '\0';
-	return output;
-	
+	return 0;
 }
 
 
@@ -72,9 +68,7 @@ int main(int argc, char** argv) {
 		puts(input);
 		return 0;
 	} else {
-		char *output = (char*)malloc(length * sizeof(char));
-		output = compress(output, input);
-		puts(output);	
+		compress(input);
 		return 0;
 	}
 	
