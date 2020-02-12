@@ -6,18 +6,26 @@ struct Node {
     struct Node *next;
 };
 
-struct Node *createNode(int value, struct Node *next) {
-    struct Node *newnode = (struct Node*)malloc(sizeof(struct Node));
+struct Node *createNode(int value) {
+    struct Node *newnode = malloc(sizeof(struct Node));
     newnode->key = value;
-    newnode->next = next;
+    newnode->next = NULL;
     return newnode;
 }
 
 int insert(int value, struct Node *head){
     if(head == NULL){
-        head = createNode(value, NULL);
+        head = createNode(value);
         return 1;
     }
+
+    if(head->key < value) {
+	struct Node *temp = createNode(value);
+	temp->next = head;
+	head = temp;
+	return 1;
+    }
+
     struct Node *curr = head;
     struct Node *prev;
     while(curr != NULL && curr->key >= value){
@@ -28,9 +36,10 @@ int insert(int value, struct Node *head){
     }
 
     if(curr == NULL){
-        prev->next = createNode(value, NULL);
+        prev->next = createNode(value);
     } else {
-        prev->next = createNode(value, curr);
+        prev->next = createNode(value);
+	prev->next->next = curr;
     }
     return 1;
 }
@@ -55,6 +64,8 @@ int delete(int value, struct Node *head){
 
     prev->next = curr->next;
     free(curr);
+
+    return 1;
 }
 
 void printlist(struct Node *head){
@@ -69,7 +80,7 @@ int main(int argc, char **argv) {
     char op;
     int value, listlength;
     listlength = 0;
-    struct Node *head;
+    struct Node *head = NULL;
 
     while(scanf("%c %i", &op, &value) != EOF){
 
