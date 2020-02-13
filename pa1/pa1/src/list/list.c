@@ -30,7 +30,7 @@ int insert(int value, struct Node **head){
     struct Node *prev;
 
     while( (curr != NULL) && (curr->key <= value) ){
-        if(curr->key == value) return 1;
+        if(curr->key == value) return 0;
 
         prev = curr;
         curr = curr->next;
