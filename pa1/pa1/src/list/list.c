@@ -13,22 +13,23 @@ struct Node *createNode(int value) {
     return newnode;
 }
 
-int insert(int value, struct Node *head){
-    if(head == NULL){
-        head = createNode(value);
+int insert(int value, struct Node **head){
+    if(*head == NULL){
+        *head = createNode(value);
         return 1;
     }
 
-    if(head->key < value) {
-	struct Node *temp = createNode(value);
-	temp->next = head;
-	head = temp;
-	return 1;
+    if((*head)->key > value) {
+	    struct Node *temp = createNode(value);
+	    temp->next = *head;
+	    *head = temp;
+	    return 1;
     }
 
-    struct Node *curr = head;
+    struct Node *curr = *head;
     struct Node *prev;
-    while(curr != NULL && curr->key >= value){
+
+    while( (curr != NULL) && (curr->key <= value) ){
         if(curr->key == value) return 1;
 
         prev = curr;
@@ -39,20 +40,21 @@ int insert(int value, struct Node *head){
         prev->next = createNode(value);
     } else {
         prev->next = createNode(value);
-	prev->next->next = curr;
+	    prev->next->next = curr;
     }
     return 1;
 }
 
-int delete(int value, struct Node *head){
-    if(head == NULL){
+int delete(int value, struct Node **head){
+    if(*head == NULL){
+        return 0;
+    }
+    if( (*head)->key == value){
+        *head = (*head)->next;
         return 1;
     }
-    if(head->key == value){
-        head = NULL;
-    }
 
-    struct Node *curr = head;
+    struct Node *curr = *head;
     struct Node *prev;
 
     while(curr != NULL && curr->key != value){
@@ -60,7 +62,7 @@ int delete(int value, struct Node *head){
         curr = curr->next;
     }
 
-    if(curr == NULL) return 1;
+    if(curr == NULL) return 0;
 
     prev->next = curr->next;
     free(curr);
@@ -86,26 +88,19 @@ int main(int argc, char **argv) {
 
         if(op == 'i'){
 
-            if(insert(value, head)){
+            if(insert(value, &head)){
                 listlength++;
-                printf("%i :", listlength);
-                printlist(head);
-            } else {
-                //Error Handle here
-                printf("\n");
             }
+            printf("%i :", listlength);
+            printlist(head);
 
         } else if (op == 'd') {
 
-            if(delete(value, head)){
+            if(delete(value, &head)){
                 listlength--;
-                printf("%i :", listlength);
-                printlist(head);
-            } else {
-                //Error Handle here
-                printf("\n");
             }
-
+            printf("%i :", listlength);
+            printlist(head);
         }
     }
     return 0;
