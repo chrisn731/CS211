@@ -95,12 +95,9 @@ int main(int argc, char** argv) {
 	if(!scanf("%i", &size)){
 		return EXIT_FAILURE;
 	}
-	int **matrix = malloc(size * sizeof(int*));
+	int **matrix = createMatrix(size);
 
 	int i, j;
-	for(i = 0; i < size; i++){
-		matrix[i] = malloc(size * sizeof(int));
-	}
 
 	for(i = 0; i < size; i++){
 		for(j = 0; j < size; j++){
