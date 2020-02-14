@@ -58,6 +58,17 @@ void search(struct Node **root, int value){
 int delete(struct Node **root, int value){
     return 0;
 }
+void print(struct Node *root) {
+
+    if(root == NULL) return;
+    printf("(");	
+    print(root->left);
+    printf("%i",root->key);
+    print(root->right);
+    printf(")"); 
+
+}
+
 
 int main() {
     char op;
@@ -78,7 +89,7 @@ int main() {
                 nodecount--;
             }
         } else if(op == 'p') {
-            
+            print(root);
         } else {
             //Incorrect Syntax case here
         }

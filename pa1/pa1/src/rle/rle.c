@@ -4,7 +4,7 @@
 int compresslength(char* input) {
 
 	char letter = input[0];
-	int inputsize = 1;
+	int inputsize = 0;
 	int i = 0;
 	int lettercount = 1;
 	int length = 0;
@@ -23,7 +23,6 @@ int compresslength(char* input) {
 			inputsize++;
 		}
 	}
-	inputsize--;
 	if(length > inputsize) return 0;
 	return length;
 }

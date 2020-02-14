@@ -61,6 +61,7 @@ int matrixmulti(int **matrixA, int power, int size){
 	freeMatrix(&matrixB, size);
 
 	printmatrix(product, size);
+	freeMatrix(&product, size);
 	return 1;
 }
 
