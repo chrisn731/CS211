@@ -85,7 +85,7 @@ void printmatrix(int **matrix, int size){
 		for(j = 0; j < size; j++) {
 			printf("%i ", matrix[i][j]);
 		}
-		printf("\n");
+		if(!(i+1 == size)) printf("\n");
 	}
 }
 
