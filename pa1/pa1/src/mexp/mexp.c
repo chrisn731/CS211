@@ -89,7 +89,7 @@ void printmatrix(int **matrix, int size){
 	}
 }
 
-int main(int argc, char** argv) {
+int main() {
 
 	int size, power;
 
