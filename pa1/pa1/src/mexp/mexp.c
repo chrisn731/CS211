@@ -1,125 +1,108 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <string.h>
 
-void printmatrix(int **matrix, int size);
 
-int **createMatrix(int size){
-	int **newmatrix = malloc(size * sizeof(int*));
-	int i;
-	for(i = 0; i < size; i++){
-		newmatrix[i] = malloc(size * sizeof(int));
-	}
-	return newmatrix;
+void arr_free(int **arr, int dim) {
+    int i;
+    for(i = 0; i < dim; i++)
+        free(arr[i]);
+    free(arr);
 }
 
-void freeMatrix(int ***matrix, int size){
-	int i;
-	for(i = 0; i < size; i++){
-		free((*matrix)[i]);
-	}
+
+void arr_print(int **arr, int dim) {
+    int i, j; 
+    for(i = 0; i < dim; i++) {
+        for(j = 0; j < dim; j++) 
+            printf((j == dim - 1) ? "%d" : "%d ", arr[i][j]);
+        printf("\n");
+    }
 }
 
-void setmatrix(int ***matrixA, int ***matrixB, int size){
-	int i,j;
-	for(i = 0; i < size; i++){
-		for(j = 0; j < size; j++){
-			(*matrixA)[i][j] = (*matrixB)[i][j];
-		}
-	}
+
+void exponentiate(int **arr, int exp, int dim) {
+    int i, j, k, n;
+    if(!exp) {
+        for(i = 0; i < dim; i++)
+            for(j = 0; j < dim; j++)
+                arr[i][j] = (i == j) ? 1 : 0;
+        return;
+    }
+    
+    int base[dim][dim]; 
+    for(i = 0; i < dim; i++)
+        for(j = 0; j < dim; j++)
+            base[i][j] = arr[i][j];
+    
+    for(n = 1; n < exp; n++) {
+        int mul[dim][dim];
+        /** memset(mul, 0, sizeof(int) * dim * dim); */
+        
+        for(i = 0; i < dim; i++) {
+            for(j = 0; j < dim; j++) {
+                mul[i][j] = 0; 
+                for(k = 0; k < dim; k++)
+                    mul[i][j] += arr[i][k] * base[k][j];
+            } 
+        }
+        for(i = 0; i < dim; i++)
+            for(j = 0; j < dim; j++)
+                arr[i][j] = mul[i][j];
+    }
 }
 
-int matrixmulti(int **matrixA, int power, int size){
-	
-	int **product = createMatrix(size);
-	int **matrixB = createMatrix(size);
 
-	int row, col, colplace, result = 0;
+int main(int argc, char **argv) {
+    if(argc < 2) {
+        perror("Need file\n");
+        return -1;
+    }
+    
+    char *c = NULL;
+    size_t n = 0;
+    FILE *fd = fopen(argv[1], "r");
+    
+    int dim, exp;
+    if(getline(&c, &n, fd)) {
+        dim = atoi(c); 
+    } else {
+        perror("Cannot get dimension\n");
+        return -1;
+    }
 
-	setmatrix(&matrixB, &matrixA, size);
-	
-	/**
-	 * row = which row to select the element from
-	 * col = which column in the matrix
-	 * colplace = which vector of A to select for 
-	 * matrix[row][col] will be used as the horizontal vector of A
-	 * matrix[col][colplace] will be used as the vertical vector of A
-	 */
-	while( (power - 1) > 0){
-		for(row = 0; row < size; row++){
-			for(colplace = 0; colplace < size; colplace++){
-				for(col = 0; col < size; col++){
-					result += matrixA[row][col] * matrixB[col][colplace];
-				}
-				product[row][colplace] = result;
-				result = 0;
-			}
-		}
-		power--;
-		setmatrix(&matrixA, &product, size);
-	}
-	freeMatrix(&matrixA, size);
-	freeMatrix(&matrixB, size);
+    int **arr = (int **) malloc(dim * sizeof(int *));
+    int i;
+    for(i = 0; i < dim; i++)
+        arr[i] = (int *) malloc(dim * sizeof(int));
 
-	printmatrix(product, size);
-	freeMatrix(&product, size);
-	return 1;
-}
+    for(i = 0; i < dim; i++) {
+        int j = 0; 
+        if(getline(&c, &n, fd) != -1) {
+            char *ptr = strtok(c, " ");
+            while(ptr) {
+                arr[i][j] = atoi(ptr);
+                ptr = strtok(NULL, " ");
+                j++;
+            }
+        }
+    }
 
-void IMatrix(int size){
-	int i,j;
-	for(i = 0; i < size; i++){
-		for(j = 0; j < size; j++){
-			if(i == j){
-				printf("1 ");
-			} else {
-				printf("0 ");
-			}
-		}
-		printf("\n");
-	}
-}
-
-void printmatrix(int **matrix, int size){
-	int i,j;
-	for(i = 0; i < size; i++){
-		for(j = 0; j < size; j++) {
-			printf("%i ", matrix[i][j]);
-		}
-		if(!(i+1 == size)) printf("\n");
-	}
-}
-
-int main() {
-
-	int size, power;
-
-	if(!scanf("%i", &size)){
-		return EXIT_FAILURE;
-	}
-	int **matrix = createMatrix(size);
-
-	int i, j;
-
-	for(i = 0; i < size; i++){
-		for(j = 0; j < size; j++){
-			if(!scanf("%i", &matrix[i][j])) {
-				puts("error");
-				return EXIT_FAILURE;
-			}
-		}
-	}
-
-	if(!scanf("%i", &power)){
-		return EXIT_FAILURE;
-	}
-
-	if(power == 0){
-		IMatrix(size);
-	} else if(power < 0){
-		return EXIT_FAILURE;
-	} else if(!matrixmulti(matrix, power, size)){
-		return EXIT_FAILURE;
-	}
-
-	return 0;
+    if(getline(&c, &n, fd)) {
+        exp = atoi(c);
+    } else {
+        perror("Cannot get exponent\n");
+        return 1;
+    }
+    
+    exponentiate(arr, exp, dim);
+    arr_print(arr, dim);
+    arr_free(arr, dim);
+    fclose(fd);
+    free(c);
+    return 0;
 }
