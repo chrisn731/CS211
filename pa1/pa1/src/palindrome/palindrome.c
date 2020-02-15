@@ -30,12 +30,6 @@ int scanpalindrome(char* string, int strlen) {
 	return 1;
 }
 
-
-
-
-
-
-
 int main(int argc, char** argv) {
 	if(argc == 1) return 0;
 	char *palindrome = argv[1];
