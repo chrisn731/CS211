@@ -24,10 +24,8 @@ int insert(struct Node **root, int value){
         prev = temp;
         if(temp->key == value){
             return 0;
-        } else if(temp->key > value){
-            temp = temp->left;
-        } else if(temp->key < value){
-            temp = temp->right;
+        } else {
+            temp = (temp->key > value) ? temp->left : temp->right;
         }
     }
 
@@ -46,18 +44,53 @@ void search(struct Node **root, int value){
         if(searchnode->key == value){
             printf("present\n");
             return;
-        } else if(searchnode->key > value){
-            searchnode = searchnode->left;
-        } else if(searchnode->key < value){
-            searchnode = searchnode->right;
+        } else {
+            searchnode = (searchnode->key > value) ? searchnode->left : searchnode->right;
         }
     }
     printf("absent\n");
 }
 
 int delete(struct Node **root, int value){
-    return 0;
+    if(*root == NULL) return 0;
+
+    struct Node *crnt = *root, *Parent = NULL;
+
+    
+    while(crnt->key != value) {
+        Parent = crnt;
+        crnt = (crnt->key > value) ? crnt->left : crnt->right;
+        if(crnt == NULL) return 0;
+    }
+
+    //Our node to be "deleted" will simply have its contents rewritten
+    //Then the node data we used to overwrite crnt will be deleted
+    if(crnt->left != NULL && crnt->right != NULL){
+        struct Node *pred = crnt->left;
+        Parent = crnt;
+        while(pred->right != NULL){
+            Parent = pred;
+            pred = pred->right;
+        }
+        crnt->key = pred->key;
+        crnt = pred;
+    }
+
+    struct Node *Rep = (crnt->left != NULL) ? crnt->left : crnt->right;
+
+    if(Parent == NULL){
+        *root = Rep;
+    } else if (Parent->left == crnt){
+        Parent->left = Rep;
+    } else {
+        Parent->right = Rep;
+    }
+
+    free(crnt);
+
+    return 1;
 }
+
 void print(struct Node *root) {
 
     if(root == NULL) return;
@@ -74,24 +107,36 @@ int main() {
     char op;
     int value, nodecount = 0;
     struct Node *root = NULL;
-    while(scanf("%c %i", &op, &value) != EOF){
-        if(op == 'i'){
-            if(insert(&root, value)){
-                nodecount++;
-                printf("inserted\n");
-            } else {
-                printf("duplicate\n");
-            }
-        } else if (op == 's'){
-            search(&root, value);
-        } else if(op == 'd'){
-            if(delete(&root, value)){
-                nodecount--;
-            }
-        } else if(op == 'p') {
+    while(scanf("%c", &op) != EOF){
+
+        if(op == 'p') {
             print(root);
+            printf("\n");
         } else {
-            //Incorrect Syntax case here
+
+            if(!scanf("%i", &value)) continue;
+
+            if(op == 'i'){
+
+                if(insert(&root, value)){
+                    nodecount++;
+                    printf("inserted\n");
+                } else {
+                    printf("duplicate\n");
+                }
+
+            } else if(op == 's'){
+                search(&root, value);
+            } else if(op == 'd'){
+
+                if(delete(&root, value)){
+                    nodecount--;
+                    printf("deleted\n");
+                } else {
+                    printf("absent\n");
+                }
+
+            }
         }
     }
 
