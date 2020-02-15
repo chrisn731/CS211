@@ -90,29 +90,40 @@ void printmatrix(int **matrix, int size){
 	}
 }
 
-int main() {
-
-	int size, power;
-
-	if(!scanf("%i", &size)){
-		return EXIT_FAILURE;
-	}
-	int **matrix = createMatrix(size);
-
+void readMatrixFile(int ***matrix, int *size, int *power, char *filename){
+	FILE *fp;
 	int i, j;
+	fp = fopen(filename, "r");
+	if(!fp){
+		printf("error");
+		exit(EXIT_FAILURE);
+	}
 
-	for(i = 0; i < size; i++){
-		for(j = 0; j < size; j++){
-			if(!scanf("%i", &matrix[i][j])) {
+	fscanf(fp, "%i\n", &(*size));
+
+    *matrix = createMatrix(*size);
+
+	for(i = 0; i < *size; i++){
+		for(j = 0; j < *size; j++){
+			if(!fscanf(fp, "%i", &(*matrix)[i][j])) {
 				puts("error");
-				return EXIT_FAILURE;
+				exit(EXIT_FAILURE);
 			}
 		}
 	}
 
-	if(!scanf("%i", &power)){
-		return EXIT_FAILURE;
-	}
+	if(!fscanf(fp, "%i", &(*power))){
+        printf("error");
+        exit(EXIT_FAILURE);
+    }
+
+}
+
+int main(int argc, char **argv) {
+
+    int **matrix, size = 0, power = 0;
+
+    readMatrixFile(&matrix, &size, &power, argv[1]);
 
 	if(power == 0){
 		IMatrix(size);
@@ -122,5 +133,6 @@ int main() {
 		return EXIT_FAILURE;
 	}
 
-	return 0;
+    return 0;
+
 }
