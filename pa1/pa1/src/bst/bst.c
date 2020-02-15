@@ -122,7 +122,7 @@ int main() {
                     nodecount++;
                     printf("inserted\n");
                 } else {
-                    printf("duplicate\n");
+                    printf("not inserted\n");
                 }
 
             } else if(op == 's'){
