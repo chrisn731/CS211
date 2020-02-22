@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
 
 	if(length == -1) {
 		puts("error");
-		return 1;
+		return 0;
 	} else if (length == 0) {
 		puts(input);
 		return 0;
