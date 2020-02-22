@@ -78,7 +78,7 @@ void printlist(struct Node *head){
     printf("\n");
 }
 
-int main(int argc, char **argv) {
+int main() {
     char op;
     int value, listlength;
     listlength = 0;

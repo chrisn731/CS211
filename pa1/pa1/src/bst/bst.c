@@ -8,6 +8,7 @@ struct Node {
 
 struct Node *createNode(int value){
     struct Node *newnode = malloc(sizeof(struct Node));
+    if(newnode == NULL) exit(EXIT_FAILURE);
     newnode->key = value;
     newnode->right = NULL;
     newnode->left = NULL;

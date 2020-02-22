@@ -31,18 +31,17 @@ int scanpalindrome(char* string, int strlen) {
 }
 
 int main(int argc, char** argv) {
-	if(argc == 1) return 0;
+	if(argc == 1 || argc > 2) return 1;
+
 	char *palindrome = argv[1];
 	int pallen = strlen(palindrome);
 
 	if(scanpalindrome(palindrome, pallen)) {
 		puts("yes");
-		return 0;
 	} else {
 		puts("no");
-		return 0;
 	}
 	
-	return 1;
+	return 0;
 
 } 

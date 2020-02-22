@@ -55,14 +55,14 @@ int compress(char *input) {
 
 
 int main(int argc, char** argv) {
-	if(argc == 1) return 0;
+	if(argc == 1 || argc > 2) return 1;
 
 	char* input = argv[1];
 	int length = compresslength(input);
 
 	if(length == -1) {
 		puts("error");
-		return 0;
+		return 1;
 	} else if (length == 0) {
 		puts(input);
 		return 0;
@@ -71,5 +71,5 @@ int main(int argc, char** argv) {
 		return 0;
 	}
 	
-	return 1;
+	return 0;
 }

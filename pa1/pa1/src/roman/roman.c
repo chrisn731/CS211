@@ -94,4 +94,5 @@ int main(int argc, char** argv) {
 	int numtoconvert = atoi(argv[1]);
 	if(numtoconvert == 0) return 0;
 	convert(numtoconvert);	
+	return 0;
 }
