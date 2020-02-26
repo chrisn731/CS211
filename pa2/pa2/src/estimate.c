@@ -82,10 +82,10 @@ void PopulateMatricies(double ***TrainingDate, double ***InputData, char *file1,
             printf("error reading file\n");
             exit(EXIT_FAILURE);
         }
-        char *FileType = malloc(6 * sizeof(char));
-        
+	// Set a Buffer to read which file (1 or 2) is our Training Data, and which is our input
+	// data. We will then fill this with the next if.
+	char FileType[6];        
         // Read the type of file, if it neither a training file or input file... exit the program
-	// I BELIEVE IT IS THIS LINE THAT IS CURRENTLY TRASHING MY RUNTIME
         if(fscanf(fp, "%s", FileType) == EOF) {
             printf("error reading file type\n");
             exit(EXIT_FAILURE);
@@ -104,6 +104,7 @@ void PopulateMatricies(double ***TrainingDate, double ***InputData, char *file1,
             *TrainingDate = readData(fp);
         }
 		free(FileType);
+		fclose(fp);
     }
 
     // If either one of the files were not read then we can quit because
@@ -112,6 +113,18 @@ void PopulateMatricies(double ***TrainingDate, double ***InputData, char *file1,
         printf("error missing training data or input data\n");
         exit(EXIT_FAILURE);
     }
+}
+
+void TransposeMatrix(double ***matrix) {
+
+}
+
+void InvertMatrix(double ***matrix){
+
+}
+
+void MultiplyMatricies(double ***matrixA, double ***matrixB) {
+
 }
 
 int main(int argc, char **argv) {
