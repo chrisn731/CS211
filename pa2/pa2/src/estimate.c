@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+// We are going to keep track when read our Training Data File.
+// This is because 
 int TRAINFILEREAD = 0;
 
 double **createMatrix(int attributes, int numofhouses){
@@ -15,7 +17,6 @@ double **createMatrix(int attributes, int numofhouses){
      */
     if(TRAINFILEREAD) {
         attributes++;
-        TRAINFILEREAD = 0;
     }
     double **matrix = malloc(sizeof(double*) * attributes);
     if(!matrix){
@@ -49,10 +50,15 @@ double **readData(FILE *datafile){
         exit(EXIT_FAILURE);
     }
     double **Data = createMatrix(attributes, numofhouses);
+    if(TRAINFILEREAD) {
+	attributes++;
+	TRAINFILEREAD = 0;
+    }
+
     int i ,j;
     // Iterate through the matrix given in the training data and then populate the
     // training data matrix
-    for(i = 0; i < (attributes + 1); ++i) {
+    for(i = 0; i < attributes; ++i) {
         for(j = 0; i < numofhouses; ++j) {
             fscanf(datafile, "%lf", &Data[i][j]);
         }
@@ -62,7 +68,7 @@ double **readData(FILE *datafile){
     return Data;
 }
 
-void PopulateMatricies(double ***TrainingDate, double ***InputData, char *file1, char *file2){
+void PopulateMatricies(double ***TrainingDate, double ***InputData, char *file1, char *file2) {
     int i, trainread = 0, inputread = 0;
     // Create an array to point to the two files so we can iterate through them
     char **files = malloc(2 * sizeof(char*));
@@ -79,6 +85,7 @@ void PopulateMatricies(double ***TrainingDate, double ***InputData, char *file1,
         char *FileType = malloc(6 * sizeof(char));
         
         // Read the type of file, if it neither a training file or input file... exit the program
+	// I BELIEVE IT IS THIS LINE THAT IS CURRENTLY TRASHING MY RUNTIME
         if(fscanf(fp, "%s", FileType) == EOF) {
             printf("error reading file type\n");
             exit(EXIT_FAILURE);
@@ -120,9 +127,12 @@ int main(int argc, char **argv) {
     // This Matrix will be our Matrix 'X'
     double **TrainingData = NULL;
     double **InputData = NULL;
-    PopulateMatricies(&TrainingData, &InputData, argv[0], argv[1]);
+    // argv[1] & argv[2] contain the files for our training data
+    // and our input data. We will populate our matricies
+    // using these two arguments.
+    PopulateMatricies(&TrainingData, &InputData, argv[1], argv[2]);
 
-
+    // ... After all is said and done, we can free our heap
     free(TrainingData);
     free(InputData);
 
