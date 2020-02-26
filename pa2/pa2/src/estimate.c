@@ -59,7 +59,7 @@ double **readData(FILE *datafile){
     // Iterate through the matrix given in the training data and then populate the
     // training data matrix
     for(i = 0; i < attributes; ++i) {
-        for(j = 0; i < numofhouses; ++j) {
+        for(j = 0; j < numofhouses; ++j) {
             fscanf(datafile, "%lf", &Data[i][j]);
         }
     }
@@ -103,7 +103,6 @@ void PopulateMatricies(double ***TrainingDate, double ***InputData, char *file1,
             trainread = 1;
             *TrainingDate = readData(fp);
         }
-		free(FileType);
 		fclose(fp);
     }
 
