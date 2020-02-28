@@ -5,7 +5,8 @@
 #include <string.h>
 
 // We are going to keep track when read our Training Data File.
-// This is because 
+// This is because when we call create Matrix we are going to manipulate the variables
+// differently then a regular matrix 
 int TRAINFILEREAD = 0;
 
 double **createMatrix(int attributes, int numofhouses){
