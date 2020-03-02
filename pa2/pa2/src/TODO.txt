@@ -1,0 +1,21 @@
+TODO for ESTIMATE
+============================================
+
+1. Clearly Label Matrix X and Y
+	a) X is going to contain our training data house attributes and the 
+	first col will be all 1's (this is due to Gauss-Jordan Elimination)
+
+	b) Y is going to be our house prices that we obtain from the last column of
+	training data.
+
+2. Create Functions for:
+	a) Multiply Matricies
+	
+	b) Transpose Matricies
+	
+	c) Invert Matrix
+		-This will implement Gauss Jordan Elimination. See Documentation for more info.
+
+3. Use functions of 2. to create a final Matrix W that will contain our Weights.
+
+4. Profit.
