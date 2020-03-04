@@ -155,8 +155,7 @@ void PrintMatrix(struct Matrix Z) {
     }
 }
 
-/** Print a given Matrix to stdout that has no decimal points.
- */
+/** Print a given Matrix to stdout that has no decimal points. */
 void PrintMatrixNoDec(struct Matrix Z) {
     int i,j;
     for(i = 0; i < Z.rows; ++i) {
@@ -167,8 +166,7 @@ void PrintMatrixNoDec(struct Matrix Z) {
     }
 }
 
-/** Transpose any given Matrix. In terms of our Algorithm it will always transpose 
- * Matrix X. */
+/** Transpose any given Matrix. In terms of our Algorithm it will always transpose Matrix X. */
 struct Matrix TransposeMatrix(struct Matrix X) {
     struct Matrix Trans = CreateMatrix(X.cols, X.rows);
     int i, j;
@@ -220,10 +218,7 @@ void PopulateMatrix(FILE **fp, int attributes, int numofhouses, struct Matrix *X
     }
 }
 
-/**
- * This method is going to be our Gaussian Elimination Function.
- * Godspeed.
- */
+/** This method is going to be our Gaussian Elimination Function. Godspeed.*/
 struct Matrix InvertMatrix(struct Matrix Invert) {
     // Identity Matrix for holding our resulting Invert Matrix 
     struct Matrix Iden = CreateMatrix(Invert.rows, Invert.cols);
@@ -288,8 +283,7 @@ struct Matrix InvertMatrix(struct Matrix Invert) {
     return Iden;
 }
 
-/** Multiply any two Matricies together. Returns a new Result Matrix.
- */
+/** Multiply any two Matricies together. Returns a new Result Matrix. */
 struct Matrix MultiplyMatrix(struct Matrix X, struct Matrix Y) {
     int row, col, rrow, rcol;
     double result;
@@ -348,6 +342,7 @@ int main(int argc, char **argv) {
     // Pass the file pointer to a function so the main function isn't so messy.
     // Look at the training data and assign Matrix sizes needed for each Matrix for function to work.
     AssignMatrixSizes(&fp, &attributes, &numofhouses, &X, &Y);
+    
     // Go back through the training data and populate matrix X & Y with the relevant data needed in each
     // Matrix. X containing attributes & Y containing house prices.
     PopulateMatricies(&fp, attributes, numofhouses, &X, &Y);
