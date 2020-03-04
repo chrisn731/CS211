@@ -16,6 +16,8 @@
  *      W        : Will contain our found weights
  * =============================================================================================================
  * Using these matricies we are going to computer W using the formula W = [ (( (X^T)(X^-1) )^-1) (X^T)(Y) ]
+ * Then we can create a new X matrix that holds our input data (our data to use for predictions)
+ * Using our new X we can use the formula XW = Y to predict the house prices
  * 
  * To calculate the inverse we will be using Gauss Jordan Elimination with some special things to note
  *      1) We will only be either be multiplying all the elements of the row by some value or adding the
@@ -34,8 +36,7 @@ struct Matrix {
     int cols;
 };
 
-/** Free a given Matrix.
- */
+/** Free a given Matrix. */
 void FreeMatrix(struct Matrix A) {
     int i;
     for(i = 0; i < A.rows; ++i) {
@@ -43,8 +44,7 @@ void FreeMatrix(struct Matrix A) {
     }
 }
 
-/** Compare two strings against each other.
- */
+/** Compare two strings against each other. */
 int StringCompare(char *word, char *against) {
     int i = 0;
     while(word[i] != '\0') {
@@ -57,8 +57,7 @@ int StringCompare(char *word, char *against) {
 }
 
 /** Create a matrix given rows and cols.
- *  In our case our rows and cols will be either num of houses or num of attributes.
- */
+ *  In our case our rows and cols will be either number of houses or number of attributes. */
 struct Matrix CreateMatrix(int rows, int cols) {
     struct Matrix new;
     new.cols = cols;
@@ -82,9 +81,7 @@ struct Matrix CreateMatrix(int rows, int cols) {
     return new;
 }
 
-/**
- * Opens the training data file to get the sizes needed for our matrix to house the data.
- */
+/** Opens the training data file to get the sizes needed for our matrix to house the data.*/
 void AssignMatrixSizes(FILE **trainingfile, int *attributes, int *numofhouses, struct Matrix *X, struct Matrix *Y) {
     if(fscanf(*trainingfile, "%i", attributes) == EOF){
         printf("error reading attributes\n");
@@ -101,8 +98,7 @@ void AssignMatrixSizes(FILE **trainingfile, int *attributes, int *numofhouses, s
 }
 
 /** Sort the files given in the arguments. This is useful because if the files are given
- * in any order the program can still run and know which file to use.
- */
+ * in any order the program can still run and know which file to use. */
 char **sortFiles(char **file1, char **file2) {
     char **files = malloc(2 * sizeof(char*));
     files[0] = *file1;
@@ -148,13 +144,12 @@ char **sortFiles(char **file1, char **file2) {
     return files;
 }
 
-/** Print a given Matrix to stdout with decimal points.
- */
+/** Print a given Matrix to stdout with decimal points. */
 void PrintMatrix(struct Matrix Z) {
     int i,j;
     for(i = 0; i < Z.rows; ++i) {
         for(j = 0; j < Z.cols; ++j){
-            printf("%lf ", Z.data[i][j]);
+            printf("%lf\t", Z.data[i][j]);
         }
         printf("\n");
     }
@@ -173,11 +168,9 @@ void PrintMatrixNoDec(struct Matrix Z) {
 }
 
 /** Transpose any given Matrix. In terms of our Algorithm it will always transpose 
- * Matrix X.
- */
+ * Matrix X. */
 struct Matrix TransposeMatrix(struct Matrix X) {
     struct Matrix Trans = CreateMatrix(X.cols, X.rows);
-    //Trans.data = CreateMatrix();
     int i, j;
     for(i = 0; i < X.rows; ++i) {
         for(j = 0; j < X.cols; ++j) {
@@ -189,8 +182,7 @@ struct Matrix TransposeMatrix(struct Matrix X) {
 
 
 /** Fill up Matrix X with the training data & fill Matrix Y with our House Prices. By the end Matrix X
- * should also only have 1's in the first column.
- */
+ * should also only have 1's in the first column.*/
 void PopulateMatricies(FILE **fp, int attributes, int numofhouses, struct Matrix *X, struct Matrix *Y){
     int i, j;
     double value;
@@ -202,7 +194,7 @@ void PopulateMatricies(FILE **fp, int attributes, int numofhouses, struct Matrix
                 (*X).data[i][j] = 1;
             } else {
                 fscanf(*fp, "%lf", &value);
-                if((j+1) == attributes){
+                if((j+1) == (attributes+2)){
                     (*Y).data[i][0] = value;
                 } else {
                     (*X).data[i][j] = value;
@@ -212,17 +204,33 @@ void PopulateMatricies(FILE **fp, int attributes, int numofhouses, struct Matrix
     }
 }
 
+/** Full up a single Matrix with given data file. */
+void PopulateMatrix(FILE **fp, int attributes, int numofhouses, struct Matrix *X) {
+    int i, j;
+    double value;
+    for(i = 0; i < numofhouses; ++i) {
+        for(j = 0; j < (attributes + 1); ++j) {
+            if(j == 0){
+                (*X).data[i][j] = 1;
+            } else {
+                fscanf(*fp, "%lf", &value);
+                (*X).data[i][j] = value;
+            }
+        }
+    }
+}
+
 /**
  * This method is going to be our Gaussian Elimination Function.
  * Godspeed.
  */
-double **InvertMatrix(struct Matrix Invert) {
-    // We must construct a Identity Matrix 
+struct Matrix InvertMatrix(struct Matrix Invert) {
+    // Identity Matrix for holding our resulting Invert Matrix 
     struct Matrix Iden = CreateMatrix(Invert.rows, Invert.cols);
     int i, j;
 
     for(i = 0; i < Iden.rows; ++i) {
-        for(j = 0; i < Iden.cols; ++j) {
+        for(j = 0; j < Iden.cols; ++j) {
             if(i == j) {
                 Iden.data[i][j] = 1;
             } else {
@@ -230,7 +238,54 @@ double **InvertMatrix(struct Matrix Invert) {
             }
         }
     }
-    return 0;
+    // Begin Gaussian Elimination
+
+    // First Pass will get the matrix into REF
+    for(i = 0; i < Invert.rows; ++i) {
+        // If our pivot is not one, reduce the whole row so then it is one.
+        if(Invert.data[i][i] != 1) {
+           double reduce = Invert.data[i][i];
+            for(j = 0; j < Invert.cols; ++j) {
+                // Everything we do to our Original Matrix we must do to our identity.
+               Invert.data[i][j] = Invert.data[i][j] / reduce;
+               Iden.data[i][j] = Iden.data[i][j] / reduce;
+            }
+        }
+
+        // We don't want to apply row operations beyond the final row.
+        if((i+1) == Invert.rows) break;
+
+        // Subtract other rows by current row to obtain our Reduced Rows.
+        for(j = i + 1; j < Invert.rows; ++j) {
+            // Get the subtraction multiplier of every value below our current pivot.
+            double multi = Invert.data[j][i];
+            int k;
+            for(k = 0; k < Invert.cols; ++k) { 
+                Invert.data[j][k] -= (multi * Invert.data[i][k]);
+                Iden.data[j][k] -= (multi * Iden.data[i][k]);
+            }
+        }
+    }
+
+    // Second pass gets the Matrix into RREF.
+    // All pivots will be one so no need to reduce.
+    for(i = (Invert.rows - 1); i > 0; --i) {
+        for(j = i - 1; j > -1; --j) {
+            // Get the subtraction multiplier of every value above our current pivot.
+            double multi = Invert.data[j][i];
+            int k;
+            for(k = (Invert.cols - 1); k > -1; --k) {
+                Invert.data[j][k] -= (multi * Invert.data[i][k]);
+                Iden.data[j][k] -= (multi * Iden.data[i][k]);
+            }
+        }
+    }
+    // End Gaussian Elimination
+
+    // We will return the "Identity Matrix" because the operations performed on our "Invert"
+    // Matrix will also apply to our identity Matrix. So our old identity matrix is now our new
+    // Inverted Matrix. Which is what we want.
+    return Iden;
 }
 
 /** Multiply any two Matricies together. Returns a new Result Matrix.
@@ -256,27 +311,6 @@ struct Matrix MultiplyMatrix(struct Matrix X, struct Matrix Y) {
     }
     return product;
 }
-
-/** Predicts the price of houses given an input data file and a found Weight Matrix.
- * Prints the Prediciton to stdout.
- */
-void Predict(FILE **InputData, struct Matrix W, int attributes, int numofhouses) {
-    int i , j;
-    double value, temp, one;
-    printf("House Price Predictions:\n");
-    for(i = 0; i < numofhouses; ++i) {
-        value = W.data[0][0];
-        for(j = 1; j < (attributes + 1); ++j) {
-            one = fscanf(*InputData, "%lf", &temp);
-            value = value + (W.data[j][0] * temp);
-        }
-        if(one) {
-            printf("%0.0lf\n", value);
-        }
-    }
-}
-
-
 
 int main(int argc, char **argv) {
     if(argc < 3){
@@ -319,18 +353,52 @@ int main(int argc, char **argv) {
     PopulateMatricies(&fp, attributes, numofhouses, &X, &Y);
     fclose(fp);
 
+    /* Easter Egg if youre a fan of one liners check this one line to get the Weight...
+    W = MultiplyMatrix(MultiplyMatrix(InvertMatrix(MultiplyMatrix(TransposeMatrix(X),X)),XT),Y);
+    ... Otherwise do it the normal way so its actually readable. */
+
+    // Begin solving for W & free memory on the way...
+    // First Transpose X to get X^T
     XT = TransposeMatrix(X);
+
+    // Multiply X^T and X : X^TX
     XTX = MultiplyMatrix(XT, X);
+    FreeMatrix(X);
 
-    // InverXTX = Matrix Inverse (XTX)
+    // Find the Inverse of that product : (X^T X)^-1
+    InverXTX = InvertMatrix(XTX);
+    FreeMatrix(XTX);
+
+    // Multiply that inverse by the Transpose of X : ((X^T X)^-1)X^T
     InXTX_XT = MultiplyMatrix(InverXTX, XT);
+    FreeMatrix(XT);
 
+    // Final Multiplication. Multiply by Y to get W : (((X^T X)^-1)X^T)Y
     W = MultiplyMatrix(InXTX_XT, Y);
+    FreeMatrix(InXTX_XT);
+    FreeMatrix(Y);
 
+    // Now that we have our weights, its time to predict the prices of houses with given input data.
     fp = fopen(testdata, "r");
+    // Skip the first word of the file.
     fscanf(fp, "%s", buffer);
-    Predict(&fp, W, attributes, numofhouses);
+
+    // Obtain our new matrix X.
+    fscanf(fp, "%d", &attributes);
+    fscanf(fp, "%d", &numofhouses);
+
+    X = CreateMatrix(numofhouses, attributes + 1);
+    PopulateMatrix(&fp, attributes, numofhouses, &X);
     fclose(fp);
+
+    // Obtain our new Y
+    Y = MultiplyMatrix(X, W);
+    PrintMatrixNoDec(Y);
+
+    FreeMatrix(W);
+    FreeMatrix(X);
+    FreeMatrix(Y);
+    
     // ... After all is said and done, we can return and enjoy the result.
     return 0;
 }
