@@ -42,6 +42,7 @@ void FreeMatrix(struct Matrix A) {
     for(i = 0; i < A.rows; ++i) {
         free(A.data[i]);
     }
+    free(A.data);
 }
 
 /** Compare two strings against each other. */
@@ -166,7 +167,8 @@ void PrintMatrixNoDec(struct Matrix Z) {
     }
 }
 
-/** Transpose any given Matrix. In terms of our Algorithm it will always transpose Matrix X. */
+/** Transpose any given Matrix. In terms of our Algorithm it will always transpose 
+ * Matrix X. */
 struct Matrix TransposeMatrix(struct Matrix X) {
     struct Matrix Trans = CreateMatrix(X.cols, X.rows);
     int i, j;
@@ -218,7 +220,7 @@ void PopulateMatrix(FILE **fp, int attributes, int numofhouses, struct Matrix *X
     }
 }
 
-/** This method is going to be our Gaussian Elimination Function. Godspeed.*/
+/** This method is going to be our Gaussian Elimination Function. Godspeed. */
 struct Matrix InvertMatrix(struct Matrix Invert) {
     // Identity Matrix for holding our resulting Invert Matrix 
     struct Matrix Iden = CreateMatrix(Invert.rows, Invert.cols);
@@ -288,10 +290,12 @@ struct Matrix MultiplyMatrix(struct Matrix X, struct Matrix Y) {
     int row, col, rrow, rcol;
     double result;
     struct Matrix product;
+
     if(X.cols != Y.rows) {
         printf("Unable to Multiply Matricies!\n");
         exit(EXIT_FAILURE);
     }
+
     product = CreateMatrix(X.rows, Y.cols);
     for(rrow = 0; rrow < X.rows; ++rrow) {
         for(rcol = 0; rcol < Y.cols; ++rcol) {
@@ -326,13 +330,7 @@ int main(int argc, char **argv) {
     
     // Create all our neede dependicies for our algorithm to work.
     int attributes, numofhouses;
-    struct Matrix X;
-    struct Matrix XT;
-    struct Matrix XTX;
-    struct Matrix Y;
-    struct Matrix InverXTX;
-    struct Matrix InXTX_XT;
-    struct Matrix W;
+    struct Matrix X, XT, XTX, Y, InverXTX, InXTX_XT, W;
 
     // Begin opening the training data and going through the training data.
     FILE *fp = fopen(trainingdata, "r");
@@ -342,7 +340,6 @@ int main(int argc, char **argv) {
     // Pass the file pointer to a function so the main function isn't so messy.
     // Look at the training data and assign Matrix sizes needed for each Matrix for function to work.
     AssignMatrixSizes(&fp, &attributes, &numofhouses, &X, &Y);
-    
     // Go back through the training data and populate matrix X & Y with the relevant data needed in each
     // Matrix. X containing attributes & Y containing house prices.
     PopulateMatricies(&fp, attributes, numofhouses, &X, &Y);
@@ -366,6 +363,7 @@ int main(int argc, char **argv) {
 
     // Multiply that inverse by the Transpose of X : ((X^T X)^-1)X^T
     InXTX_XT = MultiplyMatrix(InverXTX, XT);
+    FreeMatrix(InverXTX);
     FreeMatrix(XT);
 
     // Final Multiplication. Multiply by Y to get W : (((X^T X)^-1)X^T)Y
@@ -393,6 +391,7 @@ int main(int argc, char **argv) {
     FreeMatrix(W);
     FreeMatrix(X);
     FreeMatrix(Y);
+    free(files);
     
     // ... After all is said and done, we can return and enjoy the result.
     return 0;

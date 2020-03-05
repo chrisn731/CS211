@@ -1,10 +1,28 @@
 #!/usr/bin/env python3
 
 import autograde
-import os, os.path
+import os, os.path, shutil
 
 assignment_name = 'PA2'
-release = '1'
+release = '2'
+
+link_possible = True
+
+def link_or_copy(src, dst):
+    global link_possible
+    if link_possible:
+        autograde.logger.debug('Linking %r to %r', src, dst)
+        try:
+            if os.path.exists(dst):
+                os.remove(dst)
+            os.link(src, dst)
+            return
+        except OSError as e:
+            autograde.logger.info('Caught OSError after copy: %s', e)
+            link_possible = False
+
+    autograde.logger.debug('Copying %r to %r', src, dst)
+    shutil.copy(src, dst)
 
 class MLTest(autograde.FileRefTest):
     def __init__(self, train_file, data_file, **kws):
@@ -14,10 +32,8 @@ class MLTest(autograde.FileRefTest):
 
     def prepare(self):
         super().prepare()
-        if os.path.exists('data'): os.remove('data')
-        if os.path.exists('train'): os.remove('train')
-        os.link(self.data_file, 'data')
-        os.link(self.train_file, 'train')
+        link_or_copy(self.data_file, 'data')
+        link_or_copy(self.train_file, 'train')
         self.comments += ['training file: ' + repr(self.train_file),
                           'data file:     ' + repr(self.data_file)]
 
