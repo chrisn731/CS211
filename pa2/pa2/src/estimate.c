@@ -161,9 +161,8 @@ void PrintMatrixNoDec(struct Matrix Z) {
     int i,j;
     for(i = 0; i < Z.rows; ++i) {
         for(j = 0; j < Z.cols; ++j){
-            printf("%.0f ", Z.data[i][j]);
+            printf("%.0f\n", Z.data[i][j]);
         }
-        printf("\n");
     }
 }
 
