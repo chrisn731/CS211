@@ -66,7 +66,6 @@ struct Matrix CreateMatrix(int rows, int cols) {
     new.data = malloc(sizeof(double*) * rows);
 
     if(!new.data){
-        printf("error allocating memory to matrix");
         exit(EXIT_FAILURE);
     }
 
@@ -75,7 +74,6 @@ struct Matrix CreateMatrix(int rows, int cols) {
     for(i = 0; i < rows; ++i) {
         new.data[i] = malloc(sizeof(double) * cols);
         if(!new.data[i]) {
-            printf("error allocating memory to matrix\n");
             exit(EXIT_FAILURE);
         }
     }
@@ -85,12 +83,10 @@ struct Matrix CreateMatrix(int rows, int cols) {
 /** Opens the training data file to get the sizes needed for our matrix to house the data.*/
 void AssignMatrixSizes(FILE **trainingfile, int *attributes, int *numofhouses, struct Matrix *X, struct Matrix *Y) {
     if(fscanf(*trainingfile, "%i", attributes) == EOF){
-        printf("error reading attributes\n");
         exit(EXIT_FAILURE);
     }
 
     if(fscanf(*trainingfile, "%i", numofhouses) == EOF){
-        printf("error reading number of houses\n");
         exit(EXIT_FAILURE);
     }
 
@@ -109,14 +105,12 @@ char **sortFiles(char **file1, char **file2) {
         FILE *fp = fopen(files[i], "r");
 
         if(!fp){
-            printf("error opening file\n");
             exit(EXIT_FAILURE);
         }
 
         char FileType[6];
 
         if(fscanf(fp, "%s",FileType) == EOF) {
-            printf("error reading file type\n");
             exit(EXIT_FAILURE);
         }
 
@@ -138,7 +132,6 @@ char **sortFiles(char **file1, char **file2) {
     }
 
     if(!inputread || !trainread){
-        printf("Input Data file or Training File Not found!\n");
         exit(EXIT_FAILURE);
     }
 
@@ -166,8 +159,7 @@ void PrintMatrixNoDec(struct Matrix Z) {
     }
 }
 
-/** Transpose any given Matrix. In terms of our Algorithm it will always transpose 
- * Matrix X. */
+/** Transpose any given Matrix. In terms of our Algorithm it will always transpose Matrix X. */
 struct Matrix TransposeMatrix(struct Matrix X) {
     struct Matrix Trans = CreateMatrix(X.cols, X.rows);
     int i, j;
@@ -291,7 +283,6 @@ struct Matrix MultiplyMatrix(struct Matrix X, struct Matrix Y) {
     struct Matrix product;
 
     if(X.cols != Y.rows) {
-        printf("Unable to Multiply Matricies!\n");
         exit(EXIT_FAILURE);
     }
 
@@ -311,12 +302,10 @@ struct Matrix MultiplyMatrix(struct Matrix X, struct Matrix Y) {
 
 int main(int argc, char **argv) {
     if(argc < 3){
-        printf("error, not enough inputs\n");
         return 1;
     }
 
     if(argc > 3){
-        printf("error, too many inputs\n");
         return 1;
     }
     // argv[1] & argv[2] contain the files for our training data and our input data.
