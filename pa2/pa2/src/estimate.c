@@ -10,10 +10,11 @@
  * =============================================================================================================
  *      X        : Will Contain a column of 1's and the rest of them will contain the Training Data Attributes
  *  X Transposed : Will Contain the contents of our Matrix X but it will be transposed
- *    Inverse    : Will Contain the Inverse of the product of X Transposed and (((X^T)(X^-1))^-1)
- *      Y        : Will Contain the House Prices given to use by the Training Data File
- *  Inverse XT   : Will contain the resulting Matrix
- *      W        : Will contain our found weights
+ *     XTX       : Will contain the product of Matrix Multiplication of X and X transposed
+ *   Inverse     : Will Contain the Inverse of the product of X Transposed and (((X^T)(X^-1))^-1)
+ *      Y        : Will Contain the House Prices given by the Training Data File & The found house prices
+ *  Inverse XT   : Will contain the product of matrix multiplication of Inverse and X Transposed
+ *      W        : Will contain our found weights of the data given by the training data
  * =============================================================================================================
  * Using these matricies we are going to computer W using the formula W = [ (( (X^T)(X^-1) )^-1) (X^T)(Y) ]
  * Then we can create a new X matrix that holds our input data (our data to use for predictions)
@@ -66,6 +67,7 @@ struct Matrix CreateMatrix(int rows, int cols) {
     new.data = malloc(sizeof(double*) * rows);
 
     if(!new.data){
+        printf("error allocating memory to matrix");
         exit(EXIT_FAILURE);
     }
 
@@ -74,6 +76,7 @@ struct Matrix CreateMatrix(int rows, int cols) {
     for(i = 0; i < rows; ++i) {
         new.data[i] = malloc(sizeof(double) * cols);
         if(!new.data[i]) {
+            printf("error allocating memory to matrix\n");
             exit(EXIT_FAILURE);
         }
     }
@@ -83,10 +86,12 @@ struct Matrix CreateMatrix(int rows, int cols) {
 /** Opens the training data file to get the sizes needed for our matrix to house the data.*/
 void AssignMatrixSizes(FILE **trainingfile, int *attributes, int *numofhouses, struct Matrix *X, struct Matrix *Y) {
     if(fscanf(*trainingfile, "%i", attributes) == EOF){
+        printf("error reading attributes\n");
         exit(EXIT_FAILURE);
     }
 
     if(fscanf(*trainingfile, "%i", numofhouses) == EOF){
+        printf("error reading number of houses\n");
         exit(EXIT_FAILURE);
     }
 
@@ -105,12 +110,14 @@ char **sortFiles(char **file1, char **file2) {
         FILE *fp = fopen(files[i], "r");
 
         if(!fp){
+            printf("error opening file\n");
             exit(EXIT_FAILURE);
         }
 
         char FileType[6];
 
         if(fscanf(fp, "%s",FileType) == EOF) {
+            printf("error reading file type\n");
             exit(EXIT_FAILURE);
         }
 
@@ -132,6 +139,7 @@ char **sortFiles(char **file1, char **file2) {
     }
 
     if(!inputread || !trainread){
+        printf("Input Data file or Training File Not found!\n");
         exit(EXIT_FAILURE);
     }
 
@@ -154,12 +162,14 @@ void PrintMatrixNoDec(struct Matrix Z) {
     int i,j;
     for(i = 0; i < Z.rows; ++i) {
         for(j = 0; j < Z.cols; ++j){
-            printf("%.0f\n", Z.data[i][j]);
+            printf("%.0f ", Z.data[i][j]);
         }
+        printf("\n");
     }
 }
 
-/** Transpose any given Matrix. In terms of our Algorithm it will always transpose Matrix X. */
+/** Transpose any given Matrix. In terms of our Algorithm it will always transpose 
+ * Matrix X. */
 struct Matrix TransposeMatrix(struct Matrix X) {
     struct Matrix Trans = CreateMatrix(X.cols, X.rows);
     int i, j;
@@ -278,15 +288,14 @@ struct Matrix InvertMatrix(struct Matrix Invert) {
 
 /** Multiply any two Matricies together. Returns a new Result Matrix. */
 struct Matrix MultiplyMatrix(struct Matrix X, struct Matrix Y) {
-    int row, col, rrow, rcol;
-    double result;
-    struct Matrix product;
-
     if(X.cols != Y.rows) {
+        printf("Unable to Multiply Matricies!\n");
         exit(EXIT_FAILURE);
     }
+    int row, col, rrow, rcol;
+    double result;
 
-    product = CreateMatrix(X.rows, Y.cols);
+    struct Matrix product = CreateMatrix(X.rows, Y.cols);
     for(rrow = 0; rrow < X.rows; ++rrow) {
         for(rcol = 0; rcol < Y.cols; ++rcol) {
             result = col = 0;
@@ -302,10 +311,12 @@ struct Matrix MultiplyMatrix(struct Matrix X, struct Matrix Y) {
 
 int main(int argc, char **argv) {
     if(argc < 3){
+        printf("error, not enough inputs\n");
         return 1;
     }
 
     if(argc > 3){
+        printf("error, too many inputs\n");
         return 1;
     }
     // argv[1] & argv[2] contain the files for our training data and our input data.
