@@ -1,6 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/** This program will help you find the needed number to solve phase 9.
+ * Phase 9 Involves a Binary Tree, that is why Nodes are used here.
+ * Simply Replace Node values in the main function and the if condition within the
+ * for loop to use on your own program!
+ */
 
 int eax = 0;
 
