@@ -9,7 +9,7 @@ pa1 - A collection of small C assignments
 
 pa2 - AI/ML algorithm. A combonation of different matrix operations to predict house prices.
 
-pa3 - TBD
+pa3 - Bomb Lab. Look through x86 Intel Binary Code to defuse a bomb with 9 different stages that implement basic C functions and data structures.
 
 pa4 - TBD
 
