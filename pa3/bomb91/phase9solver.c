@@ -133,9 +133,9 @@ int main(){
         eax = fun9(root, i);
         if(eax == 2) {
             printf("The Answer to defuse phase 9 is: %d", i);
-            exit(EXIT_SUCCESS);
+            return 0;
         }
     }
 
-    return 0;
+    return 1;
 }
