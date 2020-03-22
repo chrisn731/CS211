@@ -709,30 +709,30 @@ Disassembly of section .text:
 08048f70 <fun9>:
  8048f70:	53                   	push   %ebx
  8048f71:	83 ec 18             	sub    $0x18,%esp
- 8048f74:	8b 54 24 20          	mov    0x20(%esp),%edx
- 8048f78:	8b 4c 24 24          	mov    0x24(%esp),%ecx
- 8048f7c:	85 d2                	test   %edx,%edx
- 8048f7e:	74 37                	je     8048fb7 <fun9+0x47>
- 8048f80:	8b 1a                	mov    (%edx),%ebx
- 8048f82:	39 cb                	cmp    %ecx,%ebx
+ 8048f74:	8b 54 24 20          	mov    0x20(%esp),%edx     // edx = tree pointer
+ 8048f78:	8b 4c 24 24          	mov    0x24(%esp),%ecx     // ecx = input number
+ 8048f7c:	85 d2                	test   %edx,%edx           // if edx is NULL
+ 8048f7e:	74 37                	je     8048fb7 <fun9+0x47> // return -1
+ 8048f80:	8b 1a                	mov    (%edx),%ebx         // move value at node to ebx
+ 8048f82:	39 cb                	cmp    %ecx,%ebx           // nodeval <= input number
  8048f84:	7e 13                	jle    8048f99 <fun9+0x29>
- 8048f86:	89 4c 24 04          	mov    %ecx,0x4(%esp)
- 8048f8a:	8b 42 04             	mov    0x4(%edx),%eax
- 8048f8d:	89 04 24             	mov    %eax,(%esp)
- 8048f90:	e8 db ff ff ff       	call   8048f70 <fun9>
- 8048f95:	01 c0                	add    %eax,%eax
- 8048f97:	eb 23                	jmp    8048fbc <fun9+0x4c>
- 8048f99:	b8 00 00 00 00       	mov    $0x0,%eax
- 8048f9e:	39 cb                	cmp    %ecx,%ebx
- 8048fa0:	74 1a                	je     8048fbc <fun9+0x4c>
- 8048fa2:	89 4c 24 04          	mov    %ecx,0x4(%esp)
- 8048fa6:	8b 42 08             	mov    0x8(%edx),%eax
- 8048fa9:	89 04 24             	mov    %eax,(%esp)
+ 8048f86:	89 4c 24 04          	mov    %ecx,0x4(%esp)	   // Put input number back into input
+ 8048f8a:	8b 42 04             	mov    0x4(%edx),%eax      // edx + 4 = Left Node
+ 8048f8d:	89 04 24             	mov    %eax,(%esp)	   // recurse using that node as root
+ 8048f90:	e8 db ff ff ff       	call   8048f70 <fun9>      
+ 8048f95:	01 c0                	add    %eax,%eax           // eax += eax
+ 8048f97:	eb 23                	jmp    8048fbc <fun9+0x4c> // return
+ 8048f99:	b8 00 00 00 00       	mov    $0x0,%eax           // eax = 0
+ 8048f9e:	39 cb                	cmp    %ecx,%ebx           // ebx == ecx
+ 8048fa0:	74 1a                	je     8048fbc <fun9+0x4c> // return
+ 8048fa2:	89 4c 24 04          	mov    %ecx,0x4(%esp)      // Put input number back into input
+ 8048fa6:	8b 42 08             	mov    0x8(%edx),%eax	   // edx + 8 = Right Node
+ 8048fa9:	89 04 24             	mov    %eax,(%esp)	   // recurse using that node as root
  8048fac:	e8 bf ff ff ff       	call   8048f70 <fun9>
- 8048fb1:	8d 44 00 01          	lea    0x1(%eax,%eax,1),%eax
- 8048fb5:	eb 05                	jmp    8048fbc <fun9+0x4c>
+ 8048fb1:	8d 44 00 01          	lea    0x1(%eax,%eax,1),%eax // eax = 1 + (eax + eax)
+ 8048fb5:	eb 05                	jmp    8048fbc <fun9+0x4c>   // return
  8048fb7:	b8 ff ff ff ff       	mov    $0xffffffff,%eax
- 8048fbc:	83 c4 18             	add    $0x18,%esp
+ 8048fbc:	83 c4 18             	add    $0x18,%esp            
  8048fbf:	5b                   	pop    %ebx
  8048fc0:	c3                   	ret    
 
@@ -743,21 +743,21 @@ Disassembly of section .text:
  8048fcc:	00 
  8048fcd:	c7 44 24 04 00 00 00 	movl   $0x0,0x4(%esp)
  8048fd4:	00 
- 8048fd5:	8b 44 24 20          	mov    0x20(%esp),%eax
+ 8048fd5:	8b 44 24 20          	mov    0x20(%esp),%eax      // Get User Input
  8048fd9:	89 04 24             	mov    %eax,(%esp)
- 8048fdc:	e8 ef f8 ff ff       	call   80488d0 <strtol@plt>
- 8048fe1:	89 c3                	mov    %eax,%ebx
- 8048fe3:	8d 40 ff             	lea    -0x1(%eax),%eax
- 8048fe6:	3d e8 03 00 00       	cmp    $0x3e8,%eax
+ 8048fdc:	e8 ef f8 ff ff       	call   80488d0 <strtol@plt> // Returns number into eax
+ 8048fe1:	89 c3                	mov    %eax,%ebx            // Put Number into ebx
+ 8048fe3:	8d 40 ff             	lea    -0x1(%eax),%eax      // eax--
+ 8048fe6:	3d e8 03 00 00       	cmp    $0x3e8,%eax          // eax <= 1000
  8048feb:	76 05                	jbe    8048ff2 <phase_9+0x31>
  8048fed:	e8 61 03 00 00       	call   8049353 <explode_bomb>
- 8048ff2:	89 5c 24 04          	mov    %ebx,0x4(%esp)
- 8048ff6:	c7 04 24 a0 d0 04 08 	movl   $0x804d0a0,(%esp)
+ 8048ff2:	89 5c 24 04          	mov    %ebx,0x4(%esp)       // Move input to set up for function call
+ 8048ff6:	c7 04 24 a0 d0 04 08 	movl   $0x804d0a0,(%esp)    // Pointer to the tree of 15 nodes
  8048ffd:	e8 6e ff ff ff       	call   8048f70 <fun9>
- 8049002:	83 f8 02             	cmp    $0x2,%eax
+ 8049002:	83 f8 02             	cmp    $0x2,%eax            // fun9 must return 2
  8049005:	74 05                	je     804900c <phase_9+0x4b>
  8049007:	e8 47 03 00 00       	call   8049353 <explode_bomb>
- 804900c:	83 c4 18             	add    $0x18,%esp
+ 804900c:	83 c4 18             	add    $0x18,%esp           // Solved!
  804900f:	5b                   	pop    %ebx
  8049010:	c3                   	ret    
  8049011:	66 90                	xchg   %ax,%ax
