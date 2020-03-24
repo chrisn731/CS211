@@ -15,7 +15,28 @@ struct Node *createNode(int value) {
 }
 
 int insert(int value, struct Node **head){
-    if(*head == NULL){
+	// Cool Way to shorten this method.
+	// Use a pointer to a pointer so we can iterate through the list
+	// without changing the pointers directly.
+	while(*head != NULL && (*head)->key < value){
+		head = &((*head)->next);
+	}
+	
+	// Idk if there is a better way to shorten this. So... this is the best
+	// that I got. :/
+	if((*head) != NULL) {
+		if((*head)->key == value) return 0;
+	}
+	
+	// If the head is Null or not, these 3 lines will do it all!
+	struct Node *temp = (*head);
+	(*head) = createNode(value);		
+	(*head)->next = temp;
+	
+	return 1;
+
+	/*
+	if(*head == NULL){
         *head = createNode(value);
         return 1;
     }
@@ -44,6 +65,7 @@ int insert(int value, struct Node **head){
 	    prev->next->next = curr;
     }
     return 1;
+	*/
 }
 
 int delete(int value, struct Node **head){
