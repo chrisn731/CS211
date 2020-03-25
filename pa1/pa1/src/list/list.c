@@ -49,30 +49,8 @@ int delete(int value, struct Node **head){
     struct Node *tofree = *head;
     *head = (*head)->next;
     free(tofree);
-    /*
-    if(*head == NULL){
-        return 0;
-    }
-    if( (*head)->key == value){
-        *head = (*head)->next;
-        return 1;
-    }
-
-    struct Node *curr = *head;
-    struct Node *prev;
-
-    while(curr != NULL && curr->key != value){
-        prev = curr;
-        curr = curr->next;
-    }
-
-    if(curr == NULL) return 0;
-
-    prev->next = curr->next;
-    free(curr);
 
     return 1;
-    */
 }
 
 void printlist(struct Node *head){
