@@ -24,8 +24,8 @@ int insert(int value, struct Node **head){
 	
 	// Idk if there is a better way to shorten this. So... this is the best
 	// that I got. :/
-	if((*head) != NULL) {
-		if((*head)->key == value) return 0;
+	if( (*head) != NULL && (*head)->key == value ) {
+        return 0;
 	}
 	
 	// If the head is Null or not, these 3 lines will do it all!
@@ -35,40 +35,21 @@ int insert(int value, struct Node **head){
 	
 	return 1;
 
-	/*
-	if(*head == NULL){
-        *head = createNode(value);
-        return 1;
-    }
-
-    if((*head)->key > value) {
-	    struct Node *temp = createNode(value);
-	    temp->next = *head;
-	    *head = temp;
-	    return 1;
-    }
-
-    struct Node *curr = *head;
-    struct Node *prev;
-
-    while( (curr != NULL) && (curr->key <= value) ){
-        if(curr->key == value) return 0;
-
-        prev = curr;
-        curr = curr->next;
-    }
-
-    if(curr == NULL){
-        prev->next = createNode(value);
-    } else {
-        prev->next = createNode(value);
-	    prev->next->next = curr;
-    }
-    return 1;
-	*/
 }
 
 int delete(int value, struct Node **head){
+
+
+    while(*head != NULL && ((*head)->key) != value) {
+        head = &((*head)->next);
+    }
+
+    if(*head == NULL) return 0;
+
+    struct Node *tofree = *head;
+    *head = (*head)->next;
+    free(tofree);
+    /*
     if(*head == NULL){
         return 0;
     }
@@ -91,6 +72,7 @@ int delete(int value, struct Node **head){
     free(curr);
 
     return 1;
+    */
 }
 
 void printlist(struct Node *head){
