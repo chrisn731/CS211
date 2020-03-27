@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// bst.c has seen been rewritten with some fancier pointer manipulation. Comments to follow train of thought.
+
 struct Node {
     int key;
     struct Node *left, *right;
@@ -15,27 +17,14 @@ struct Node *createNode(int value){
     return newnode;
 }
 
-int insert(struct Node **root, int value){
-    if(*root == NULL){
-        *root = createNode(value);
-        return 1;
-    }
-    struct Node *temp = *root, *prev;
-    while(temp != NULL){
-        prev = temp;
-        if(temp->key == value){
-            return 0;
-        } else {
-            temp = (temp->key > value) ? temp->left : temp->right;
-        }
+int insert(struct Node **root, int value) {
+    // Iterate through the tree until we are NULL or find a duplicate value.
+    while( (*root) != NULL) {
+        if( (*root)->key == value) return 0;
+        root = ((*root)->key > value) ? &((*root)->left) : &((*root)->right);
     }
 
-    if(prev->key > value){
-        prev->left = createNode(value);
-    } else {
-        prev->right = createNode(value);
-    }
-
+    *root = createNode(value);
     return 1;
 }
 
@@ -45,55 +34,48 @@ void search(struct Node **root, int value){
         if(searchnode->key == value){
             printf("present\n");
             return;
-        } else {
-            searchnode = (searchnode->key > value) ? searchnode->left : searchnode->right;
         }
+        searchnode = (searchnode->key > value) ? searchnode->left : searchnode->right;
     }
     printf("absent\n");
 }
 
 int delete(struct Node **root, int value){
-    if(*root == NULL) return 0;
-
-    struct Node *crnt = *root, *Parent = NULL;
-
+    // Iterate through the tree until we find the value
+    while((*root) != NULL && (*root)->key != value) {
+        root = ((*root)->key > value) ? &((*root)->left) : &((*root)->right);
+    }
+    // If we didn't find our value return
+    if (*root == NULL) return 0;
     
-    while(crnt->key != value) {
-        Parent = crnt;
-        crnt = (crnt->key > value) ? crnt->left : crnt->right;
-        if(crnt == NULL) return 0;
-    }
-
-    //Our node to be "deleted" will simply have its contents rewritten
-    //Then the node data we used to overwrite crnt will be deleted
-    if(crnt->left != NULL && crnt->right != NULL){
-        struct Node *pred = crnt->left;
-        Parent = crnt;
-        while(pred->right != NULL){
-            Parent = pred;
-            pred = pred->right;
+    // The current node we are on is our "delete" node.
+    // If our "delete has 2 children then we must find a "child" node that we can replace with
+    // so that the BST will still be valid. To do this we go to the left subtree and go all the way
+    // to the right such that it is the value closest to our "delete" node. Once this node is found
+    // set the "delete" node's value to be the "child" node's value and set the "delete" node pointer
+    // to be on the "child" node.
+    if( (*root)->left != NULL && (*root)->right != NULL){
+        struct Node **newval = &((*root)->left);
+        while((*newval)->right != NULL){
+            newval = &((*newval)->right);
         }
-        crnt->key = pred->key;
-        crnt = pred;
+
+        (*root)->key = (*newval)->key;
+        root = newval;
     }
-
-    struct Node *Rep = (crnt->left != NULL) ? crnt->left : crnt->right;
-
-    if(Parent == NULL){
-        *root = Rep;
-    } else if (Parent->left == crnt){
-        Parent->left = Rep;
-    } else {
-        Parent->right = Rep;
-    }
-
-    free(crnt);
+    
+    // Our pointer is pointing to the node we want to delete which will have at most one child.
+    // We can simply rewrite the pointer to point to one of the subtree's which are not null. If
+    // both are null we simply just pick one of them.:
+    struct Node *tofree = *root;
+    *root = ((*root)->left == NULL) ? (*root)->right : (*root)->left;
+    free(tofree);
 
     return 1;
 }
 
 void print(struct Node *root) {
-
+    // Inorder traversal.
     if(root == NULL) return;
     printf("(");	
     print(root->left);
@@ -102,7 +84,6 @@ void print(struct Node *root) {
     printf(")"); 
 
 }
-
 
 int main() {
     char op;
@@ -136,11 +117,8 @@ int main() {
                 } else {
                     printf("absent\n");
                 }
-
             }
         }
     }
-
     return 0;
-
 }
