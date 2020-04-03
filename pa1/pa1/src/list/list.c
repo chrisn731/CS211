@@ -19,8 +19,8 @@ int insert(int value, struct Node **head){
 	// Use a pointer to a pointer so we can iterate through the list
 	// without changing the pointers directly.
 	while(*head != NULL && (*head)->key <= value){
-        if((*head)->key == value) return 0;
-        head = &((*head)->next);
+		if((*head)->key == value) return 0;
+		head = &((*head)->next);
 	}
 	
 	
