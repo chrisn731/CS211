@@ -18,15 +18,11 @@ int insert(int value, struct Node **head){
 	// Cool Way to shorten this method.
 	// Use a pointer to a pointer so we can iterate through the list
 	// without changing the pointers directly.
-	while(*head != NULL && (*head)->key < value){
-		head = &((*head)->next);
+	while(*head != NULL && (*head)->key <= value){
+        if((*head)->key == value) return 0;
+        head = &((*head)->next);
 	}
 	
-	// Idk if there is a better way to shorten this. So... this is the best
-	// that I got. :/
-	if( (*head) != NULL && (*head)->key == value ) {
-        return 0;
-	}
 	
 	// If the head is Null or not, these 3 lines will do it all!
 	struct Node *temp = (*head);
