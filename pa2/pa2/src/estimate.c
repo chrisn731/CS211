@@ -191,13 +191,13 @@ void PopulateMatricies(FILE **fp, int attributes, int numofhouses, struct Matrix
         // then the actual length of the file. So we increase by two so we can capture the last column.
         for(j = 0; j < (attributes + 2); ++j) {
             if(j == 0){
-                (*X).data[i][j] = 1;
+                X->data[i][j] = 1;
             } else {
                 fscanf(*fp, "%lf", &value);
                 if((j+1) == (attributes+2)){
-                    (*Y).data[i][0] = value;
+                    Y->data[i][0] = value;
                 } else {
-                    (*X).data[i][j] = value;
+                    X->data[i][j] = value;
                 }
             }
         }
@@ -211,10 +211,10 @@ void PopulateMatrix(FILE **fp, int attributes, int numofhouses, struct Matrix *X
     for(i = 0; i < numofhouses; ++i) {
         for(j = 0; j < (attributes + 1); ++j) {
             if(j == 0){
-                (*X).data[i][j] = 1;
+                X->data[i][j] = 1;
             } else {
                 fscanf(*fp, "%lf", &value);
-                (*X).data[i][j] = value;
+                X->data[i][j] = value;
             }
         }
     }
