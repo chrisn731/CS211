@@ -9,10 +9,10 @@ struct Variable {
 };
 
 struct VarTable {
-	struct Variable		**Vars;
-	int 				InputEnd;
-	int					OutputEnd;
-	int					TempEnd;
+	struct Variable	**Vars;
+	int		InputEnd;
+	int		OutputEnd;
+	int		TempEnd;
 };
 
 int StrComp(char *tocomp, char *given)
