@@ -10,16 +10,16 @@ struct Variable {
 
 struct VarTable {
 	struct Variable	**Vars;
-	int		InputEnd;
-	int		OutputEnd;
-	int		TempEnd;
+	int	InputEnd;
+	int	OutputEnd;
+	int	TempEnd;
 };
 
 struct Gate {
-	kind_t		type;
-	int			*param;
+	kind_t	type;
+	int	*param;
 	struct Gate	*next;
-	int			NumOfParam;
+	int	NumOfParam;
 };
 
 // Circuit Methods to be implmented
