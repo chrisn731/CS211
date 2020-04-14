@@ -16,10 +16,10 @@ struct VarTable {
 };
 
 struct Gate {
-	kind_t	type;
-	int	*param;
 	struct Gate	*next;
+	int	*param;
 	int	NumOfParam;
+	kind_t type;
 };
 
 // Circuit Methods to be implmented
@@ -43,6 +43,21 @@ int StrComp(char *tocomp, char *given)
 		++i;
 	}
 	return 1;
+}
+
+int Pow(int Base, int Exponent)
+{
+	int i, total = Base;
+	for(i = 0; i < Exponent; ++i) total *= Base;
+	return total;
+}
+
+void PrintTableVars(struct VarTable Table)
+{
+	int i;
+	puts("All found Varibales:");
+	for(i = 0; i < Table.TempEnd; ++i)
+		printf("%s\n", Table.Vars[i]->VarName);
 }
 
 void ReadIOVars(struct VarTable *Table, FILE **fp)
@@ -82,12 +97,60 @@ void ReadIOVars(struct VarTable *Table, FILE **fp)
 		temp->index = i;
 		Table->Vars[i] = temp;
 	}
+}
 
-	// Print Vars for debugging
-	puts("All found vars:");
-	for(i = 0; i < Table->OutputEnd; ++i)
-		printf("%s\n", Table->Vars[i]->VarName);
-
+void Search_For_Temps(struct VarTable *Table, FILE *fp)
+{
+	char BUFFER[16];
+	int NumOfIn, NumOfOut;
+	Table->TempEnd = Table->OutputEnd;
+	while(fscanf(fp, "%16s", BUFFER) != EOF) {
+		// Check if its a 'NOT' or 'PASS' Gate
+		puts(BUFFER);
+		if( (BUFFER[0] == 'N' && BUFFER[2] == 'T') || (BUFFER[0] == 'P')) {
+			NumOfIn = 1;
+			NumOfOut = 1;
+		}
+		// Check if it's Decoder or Multiplexer 
+		else if( (BUFFER[0] == 'D') || (BUFFER[0] == 'M') ) {
+			fscanf(fp, "%d", &NumOfIn);
+			if(BUFFER[0] == 'D') {
+				NumOfOut = Pow(2, NumOfIn);
+			}
+			else {
+				NumOfOut = 1;
+				NumOfIn += Pow(2, NumOfIn);
+			}
+		}
+		// If its not the previous options it must have 2 Inputs and 1 Output
+		else {
+			NumOfIn = 2;
+			NumOfOut = 1;
+		}
+		// Go through our current Variables and see if we already have that Variable.
+		// If not, append it to our table.
+		int i, j;
+		for(i = 0; i < (NumOfIn + NumOfOut); ++i) {
+			fscanf(fp, "%16s", BUFFER);
+			if(BUFFER[0] == '1' || BUFFER[0] == '0' || BUFFER[0] == '_')
+				continue;
+			else {
+				for(j = 0; j < Table->TempEnd; ++j){
+					if(StrComp(BUFFER, Table->Vars[j]->VarName))
+						break;
+				}
+				if(j+1 == Table->TempEnd) {
+					char *var = malloc(sizeof(char) * 17);
+					var[0] = 'x';
+					struct Variable *temp = malloc(sizeof(struct Variable));
+					temp->VarName = var;
+					temp->index = Table->TempEnd;
+					Table->Vars[Table->TempEnd] = temp;
+					++(Table->TempEnd);
+				}
+			}
+		}
+	}
 }
 
 int main(int argc, char *argv[])
@@ -105,7 +168,8 @@ int main(int argc, char *argv[])
 	
 	struct VarTable Table;
 	ReadIOVars(&Table, &fp);
-
+	Search_For_Temps(&Table, fp);
+	PrintTableVars(Table);
 	fclose(fp);
 
 
