@@ -16,10 +16,10 @@ struct VarTable {
 };
 
 struct Gate {
-	kind_t	type;
-	int	*param;
+	kind_t		type;
+	int			*param;
 	struct Gate	*next;
-	int	NumOfParam;
+	int			NumOfParam;
 };
 
 // Circuit Methods to be implmented
