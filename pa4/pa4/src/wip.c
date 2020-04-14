@@ -45,55 +45,48 @@ int StrComp(char *tocomp, char *given)
 	return 1;
 }
 
-void ReadCircuit(char *filename)
+void ReadIOVars(struct VarTable *Table, FILE **fp)
 {
-	FILE *fp = fopen(filename, "r");
-	if(!fp) {
-		printf("Error Opening file");
-		exit(EXIT_FAILURE);
-	}
-
 	// Scan the 'INPUT' string
 	char IOBUF[7];
-	fscanf(fp, "%s", IOBUF);
+	fscanf(*fp, "%s", IOBUF);
 	int i, NumOfInputs;
-	fscanf(fp, "%d", &NumOfInputs);
+	fscanf(*fp, "%d", &NumOfInputs);
 	
-	struct VarTable Table;
-	Table.InputEnd = NumOfInputs;
-	Table.Vars = malloc(sizeof(struct Variable*) * NumOfInputs);
-
+	Table->InputEnd = NumOfInputs;
+	Table->Vars = malloc(sizeof(struct Variable*) * NumOfInputs);
+	
+	// Read the Input Vars and store them in the Variable struct
 	for(i = 0; i < NumOfInputs; ++i) {
 		char *var = malloc(sizeof(char) * 17);
-		fscanf(fp, "%16s", var);
+		fscanf(*fp, "%16s", var);
 		struct Variable *temp = malloc(sizeof(struct Variable));
 		temp->VarName = var;
 		temp->index = i;
-		Table.Vars[i] = temp;
+		Table->Vars[i] = temp;
 	}
 
 	// Scan the 'OUTPUT' string
-	fscanf(fp, "%s", IOBUF);
+	fscanf(*fp, "%s", IOBUF);
 
-	fscanf(fp, "%d", &NumOfInputs);
-	Table.Vars = realloc(Table.Vars, sizeof(struct Variable*) * (NumOfInputs + Table.InputEnd));
-	Table.OutputEnd = NumOfInputs + Table.InputEnd;
+	fscanf(*fp, "%d", &NumOfInputs);
+	Table->Vars = realloc(Table->Vars, sizeof(struct Variable*) * (NumOfInputs + Table->InputEnd));
+	Table->OutputEnd = NumOfInputs + Table->InputEnd;
 
-	for(; i < Table.OutputEnd; ++i) {
+	// Read the Output Vars and store them in the Variable struct
+	for(; i < Table->OutputEnd; ++i) {
 		char *var = malloc(sizeof(char) * 17);
-		fscanf(fp, "%16s", var);
+		fscanf(*fp, "%16s", var);
 		struct Variable *temp = malloc(sizeof(struct Variable));
 		temp->VarName = var;
 		temp->index = i;
-		Table.Vars[i] = temp;
+		Table->Vars[i] = temp;
 	}
 
+	// Print Vars for debugging
 	puts("All found vars:");
-	for(i = 0; i < Table.OutputEnd; ++i)
-		printf("%s\n", Table.Vars[i]->VarName);
-
-
-	fclose(fp);
+	for(i = 0; i < Table->OutputEnd; ++i)
+		printf("%s\n", Table->Vars[i]->VarName);
 
 }
 
@@ -104,6 +97,16 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	ReadCircuit(argv[1]);	
+	FILE *fp = fopen(argv[1], "r");
+	if(!fp) {
+		printf("error opening file");
+		return 1;
+	}
 	
+	struct VarTable Table;
+	ReadIOVars(&Table, &fp);
+
+	fclose(fp);
+
+
 }
