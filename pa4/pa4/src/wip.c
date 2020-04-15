@@ -33,6 +33,8 @@ int NOR(int input1, int input2){}
 int XOR(int input1, int input2){}
 */
 
+// ====================================== Utility Functions ====================================================
+
 /** String Compare Method */
 int StrComp(char *tocomp, char *given)
 {
@@ -45,6 +47,7 @@ int StrComp(char *tocomp, char *given)
 	return 1;
 }
 
+/** String Copy */
 void StrCopy(char *src, char *dest)
 {
 	int i = 0;
@@ -55,6 +58,7 @@ void StrCopy(char *src, char *dest)
 	dest[i] = '\0';
 }
 
+/** Math Power Function. Base ^ Exponent */
 int Pow(int Base, int Exponent)
 {
 	int i, total = Base;
@@ -62,6 +66,7 @@ int Pow(int Base, int Exponent)
 	return total;
 }
 
+/** Print the Variable Table */
 void PrintTableVars(struct VarTable Table)
 {
 	int i;
@@ -69,6 +74,8 @@ void PrintTableVars(struct VarTable Table)
 	for(i = 0; i < Table.TempEnd; ++i)
 		printf("%s\n", Table.Vars[i]->VarName);
 }
+
+// ====================================== End Of Utility Functions ====================================================
 
 void ReadIOVars(struct VarTable *Table, FILE **fp)
 {
