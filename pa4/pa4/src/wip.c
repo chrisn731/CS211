@@ -3,11 +3,15 @@
 
 typedef enum { AND, OR, NAND, NOR, XOR, NOT, PASS, DECODER, MULTIPLEXER } kind_t;
 
+// The master Variable table is made up of Variables. A single variable contains the variable name,
+// the index of it in the current Table, and the value it is currently holding.
 struct Variable {
 	char	*VarName;
 	int	index;
+	int value;
 };
 
+// The master Variable Table. Will hold all our variables for our gate to refer to.
 struct VarTable {
 	struct Variable	**Vars;
 	int	InputEnd;
@@ -15,9 +19,17 @@ struct VarTable {
 	int	TempEnd;
 };
 
+/** Gates of the ciruit.
+ * Next : Holds the location of the Gate to be completed next.
+ * **Inparam : Array that points to the variables in the master table that it relies on for input.
+ * **outparam : Same as inparam but for output.
+ * NumOfParam : Keeps track on how many variables it deals with. Mostly important for MUX and DEC.
+ * type : 0-11 value that will allow us to quickly decifer what gate it is.
+ */
 struct Gate {
 	struct Gate	*next;
-	int	*param;
+	int	**inparam;
+	int **outparam;
 	int	NumOfParam;
 	kind_t type;
 };
@@ -95,6 +107,7 @@ void ReadIOVars(struct VarTable *Table, FILE **fp)
 		struct Variable *temp = malloc(sizeof(struct Variable));
 		temp->VarName = var;
 		temp->index = i;
+		temp->value = 0;
 		Table->Vars[i] = temp;
 	}
 
@@ -112,6 +125,7 @@ void ReadIOVars(struct VarTable *Table, FILE **fp)
 		struct Variable *temp = malloc(sizeof(struct Variable));
 		temp->VarName = var;
 		temp->index = i;
+		temp->value = 0;
 		Table->Vars[i] = temp;
 	}
 }
@@ -161,6 +175,7 @@ void Search_For_Temps(struct VarTable *Table, FILE *fp)
 					struct Variable *temp = malloc(sizeof(struct Variable));
 					temp->VarName = var;
 					temp->index = Table->TempEnd;
+					temp->value = 0;
 					Table->Vars = realloc(Table->Vars, sizeof(struct Variable*) * (1 + Table->TempEnd));
 					Table->Vars[Table->TempEnd] = temp;
 					++(Table->TempEnd);
@@ -168,6 +183,11 @@ void Search_For_Temps(struct VarTable *Table, FILE *fp)
 			}
 		}
 	}
+}
+
+void CreateGates(struct Gate **First)
+{
+	return;
 }
 
 int main(int argc, char *argv[])
@@ -187,7 +207,8 @@ int main(int argc, char *argv[])
 	ReadIOVars(&Table, &fp);
 	Search_For_Temps(&Table, fp);
 	PrintTableVars(Table);
+	struct Gate *First = malloc(sizeof(struct Gate));
+	CreateGates(&First);
 	fclose(fp);
-
 
 }
