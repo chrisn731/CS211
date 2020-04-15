@@ -13,7 +13,7 @@ struct Variable {
 
 // The master Variable Table. Will hold all our variables for our gate to refer to.
 struct VarTable {
-	struct Variable	**Vars;
+	struct Variable	*Vars;
 	int	InputEnd;
 	int	OutputEnd;
 	int	TempEnd;
@@ -84,7 +84,20 @@ void PrintTableVars(struct VarTable Table)
 	int i;
 	puts("All found Varibales:");
 	for(i = 0; i < Table.TempEnd; ++i)
-		printf("%s\n", Table.Vars[i]->VarName);
+		printf("%s\n", Table.Vars[i].VarName);
+}
+
+void PrintTableValues(struct VarTable Table)
+{
+	int i;
+	puts("VarTable Values:");
+	for(i = 0; i < Table.InputEnd; ++i)
+		printf("%d ", Table.Vars[i].value);
+
+	printf("|");
+
+	for(; i < Table.OutputEnd; ++i)
+		printf("%d ", Table.Vars[i].value);
 }
 
 // ====================================== End Of Utility Functions ====================================================
@@ -98,44 +111,40 @@ void ReadIOVars(struct VarTable *Table, FILE **fp)
 	fscanf(*fp, "%d", &NumOfInputs);
 	
 	Table->InputEnd = NumOfInputs;
-	Table->Vars = malloc(sizeof(struct Variable*) * NumOfInputs);
+	Table->Vars = malloc(sizeof(struct Variable) * NumOfInputs);
 	
 	// Read the Input Vars and store them in the Variable struct
 	for(i = 0; i < NumOfInputs; ++i) {
-		char *var = malloc(sizeof(char) * 17);
-		fscanf(*fp, "%16s", var);
-		struct Variable *temp = malloc(sizeof(struct Variable));
-		temp->VarName = var;
-		temp->index = i;
-		temp->value = 0;
-		Table->Vars[i] = temp;
+		Table->Vars[i].VarName = malloc(sizeof(char) * 17);
+		fscanf(*fp, "%16s", Table->Vars[i].VarName);
+		Table->Vars[i].index = i;
+		Table->Vars[i].value = 0;
 	}
 
-	// Scan the 'OUTPUT' string
+	// Scan the 'OUTPUT' string and reuse the NumOfInputs variable for the NumOfOutputs
 	fscanf(*fp, "%s", IOBUF);
-
 	fscanf(*fp, "%d", &NumOfInputs);
-	Table->Vars = realloc(Table->Vars, sizeof(struct Variable*) * (NumOfInputs + Table->InputEnd));
+
+	// Allocate more space for the output variables
+	Table->Vars = realloc(Table->Vars, sizeof(struct Variable) * (NumOfInputs + Table->InputEnd));
 	Table->OutputEnd = NumOfInputs + Table->InputEnd;
 
 	// Read the Output Vars and store them in the Variable struct
 	for(; i < Table->OutputEnd; ++i) {
-		char *var = malloc(sizeof(char) * 17);
-		fscanf(*fp, "%16s", var);
-		struct Variable *temp = malloc(sizeof(struct Variable));
-		temp->VarName = var;
-		temp->index = i;
-		temp->value = 0;
-		Table->Vars[i] = temp;
+		Table->Vars[i].VarName = malloc(sizeof(char) * 17);
+		fscanf(*fp, "%16s", Table->Vars[i].VarName);
+		Table->Vars[i].index = i;
+		Table->Vars[i].value = 0;
 	}
 }
 
 void Search_For_Temps(struct VarTable *Table, FILE *fp)
 {
 	char BUFFER[17];
-	int NumOfIn, NumOfOut;
+	int NumOfIn = 2, NumOfOut = 1;
 	Table->TempEnd = Table->OutputEnd;
 	while(fscanf(fp, "%16s", BUFFER) != EOF) {
+		
 		// Check if its a 'NOT' or 'PASS' Gate
 		if( (BUFFER[0] == 'N' && BUFFER[2] == 'T') || (BUFFER[0] == 'P')) {
 			NumOfIn = 1;
@@ -153,31 +162,24 @@ void Search_For_Temps(struct VarTable *Table, FILE *fp)
 			}
 		}
 		// If its not the previous options it must have 2 Inputs and 1 Output
-		else {
-			NumOfIn = 2;
-			NumOfOut = 1;
-		}
+		
+		
 		// Go through our current Variables and see if we already have that Variable.
 		// If not, append it to our table.
 		int i, j;
 		for(i = 0; i < (NumOfIn + NumOfOut); ++i) {
 			fscanf(fp, "%16s", BUFFER);
-			if(BUFFER[0] == '1' || BUFFER[0] == '0' || BUFFER[0] == '_')
-				continue;
-			else {
+			if( !(BUFFER[0] == '1' || BUFFER[0] == '0' || BUFFER[0] == '_') )
 				for(j = 0; j < Table->TempEnd; ++j){
-					if(StrComp(BUFFER, Table->Vars[j]->VarName))
+					if(StrComp(BUFFER, Table->Vars[j].VarName))
 						break;
 				}
 				if(j == Table->TempEnd) {
-					char *var = malloc(sizeof(BUFFER));
-					StrCopy(BUFFER, var);
-					struct Variable *temp = malloc(sizeof(struct Variable));
-					temp->VarName = var;
-					temp->index = Table->TempEnd;
-					temp->value = 0;
-					Table->Vars = realloc(Table->Vars, sizeof(struct Variable*) * (1 + Table->TempEnd));
-					Table->Vars[Table->TempEnd] = temp;
+					Table->Vars = realloc(Table->Vars, sizeof(struct Variable) * (1 + Table->TempEnd));
+					Table->Vars[Table->TempEnd].VarName = malloc(sizeof(BUFFER));
+					StrCopy(BUFFER, Table->Vars[Table->TempEnd].VarName);
+					Table->Vars[Table->TempEnd].index = Table->TempEnd;
+					Table->Vars[Table->TempEnd].value = 0;
 					++(Table->TempEnd);
 				}
 			}
@@ -205,7 +207,9 @@ int main(int argc, char *argv[])
 	
 	struct VarTable Table;
 	ReadIOVars(&Table, &fp);
+	puts("Read IO Vars");
 	Search_For_Temps(&Table, fp);
+	puts("Read all temps");
 	PrintTableVars(Table);
 	struct Gate *First = malloc(sizeof(struct Gate));
 	CreateGates(&First);
