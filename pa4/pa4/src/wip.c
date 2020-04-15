@@ -45,6 +45,16 @@ int StrComp(char *tocomp, char *given)
 	return 1;
 }
 
+void StrCopy(char *src, char *dest)
+{
+	int i = 0;
+	while(src[i] != '\0'){
+		dest[i] = src[i];
+		++i;
+	}
+	dest[i] = '\0';
+}
+
 int Pow(int Base, int Exponent)
 {
 	int i, total = Base;
@@ -101,12 +111,11 @@ void ReadIOVars(struct VarTable *Table, FILE **fp)
 
 void Search_For_Temps(struct VarTable *Table, FILE *fp)
 {
-	char BUFFER[16];
+	char BUFFER[17];
 	int NumOfIn, NumOfOut;
 	Table->TempEnd = Table->OutputEnd;
 	while(fscanf(fp, "%16s", BUFFER) != EOF) {
 		// Check if its a 'NOT' or 'PASS' Gate
-		puts(BUFFER);
 		if( (BUFFER[0] == 'N' && BUFFER[2] == 'T') || (BUFFER[0] == 'P')) {
 			NumOfIn = 1;
 			NumOfOut = 1;
@@ -139,12 +148,13 @@ void Search_For_Temps(struct VarTable *Table, FILE *fp)
 					if(StrComp(BUFFER, Table->Vars[j]->VarName))
 						break;
 				}
-				if(j+1 == Table->TempEnd) {
-					char *var = malloc(sizeof(char) * 17);
-					var[0] = 'x';
+				if(j == Table->TempEnd) {
+					char *var = malloc(sizeof(BUFFER));
+					StrCopy(BUFFER, var);
 					struct Variable *temp = malloc(sizeof(struct Variable));
 					temp->VarName = var;
 					temp->index = Table->TempEnd;
+					Table->Vars = realloc(Table->Vars, sizeof(struct Variable*) * (1 + Table->TempEnd));
 					Table->Vars[Table->TempEnd] = temp;
 					++(Table->TempEnd);
 				}
