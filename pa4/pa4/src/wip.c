@@ -331,22 +331,30 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 {
 	while(First != NULL){
 		switch(First->type){
+			// PASS
 			case 0:
 				break;
+			// NOT
 			case 1:
 				break;
+			// AND
 			case 2:
-				break;
+				First->outparam[0][0] = First->inparam[0][0] * First->inparam[1][0];
+			// NAND
 			case 3:
 				break;
+			// NOR
 			case 4:
 				break;
+			// OR
 			case 5:
 				break;
+			// XOR
 			case 6:
 				break;
+			// DECODER
 			case 7:
-				break;
+				break;	
 			case 8:
 				break;	
 
