@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef enum { AND, OR, NAND, NOR, XOR, NOT, PASS, DECODER, MULTIPLEXER } kind_t;
+typedef enum { PASS, NOT, AND, NAND, NOR, OR, XOR, DECODER, MULTIPLEXER } kind_t;
 
 // The master Variable table is made up of Variables. A single variable contains the variable name,
 // the index of it in the current Table, and the value it is currently holding.
@@ -30,7 +30,8 @@ struct Gate {
 	struct Gate	*next;
 	int	**inparam;
 	int **outparam;
-	int	NumOfParam;
+	int	NumOfIn;
+	int NumOfOut;
 	kind_t type;
 };
 
@@ -87,6 +88,7 @@ void PrintTableVars(struct VarTable Table)
 		printf("%s\n", Table.Vars[i].VarName);
 }
 
+/** Print the values of the variables in the table */
 void PrintTableValues(struct VarTable Table)
 {
 	int i;
@@ -94,14 +96,24 @@ void PrintTableValues(struct VarTable Table)
 	for(i = 0; i < Table.InputEnd; ++i)
 		printf("%d ", Table.Vars[i].value);
 
-	printf("|");
+	printf("| ");
 
 	for(; i < Table.OutputEnd; ++i)
 		printf("%d ", Table.Vars[i].value);
+	printf("\n");
+}
+
+void PrintGates(struct Gate *First)
+{
+	while(First != NULL){
+		printf("NumofIn: %d NumofOut: %d, type %d\n", First->NumOfIn, First->NumOfOut, First->type);
+		First = First->next;
+	}
 }
 
 // ====================================== End Of Utility Functions ====================================================
 
+// ======================================= Start of Main Functions ====================================================
 void ReadIOVars(struct VarTable *Table, FILE **fp)
 {
 	// Scan the 'INPUT' string
@@ -136,6 +148,7 @@ void ReadIOVars(struct VarTable *Table, FILE **fp)
 		Table->Vars[i].index = i;
 		Table->Vars[i].value = 0;
 	}
+	return;
 }
 
 void Search_For_Temps(struct VarTable *Table, FILE *fp)
@@ -169,7 +182,7 @@ void Search_For_Temps(struct VarTable *Table, FILE *fp)
 		int i, j;
 		for(i = 0; i < (NumOfIn + NumOfOut); ++i) {
 			fscanf(fp, "%16s", BUFFER);
-			if( !(BUFFER[0] == '1' || BUFFER[0] == '0' || BUFFER[0] == '_') )
+			if( !(BUFFER[0] == '1' || BUFFER[0] == '0' || BUFFER[0] == '_') ){
 				for(j = 0; j < Table->TempEnd; ++j){
 					if(StrComp(BUFFER, Table->Vars[j].VarName))
 						break;
@@ -185,12 +198,154 @@ void Search_For_Temps(struct VarTable *Table, FILE *fp)
 			}
 		}
 	}
-}
-
-void CreateGates(struct Gate **First)
-{
 	return;
 }
+
+void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *fp)
+{
+	struct Gate **Indirect = First;
+	char BUFFER[17];
+	kind_t type;
+	// Skip the first two lines.
+	char SKIP[16384];
+	fgets(SKIP, 16384, fp);
+	fgets(SKIP, 16384, fp);
+	while(fscanf(fp, "%16s", BUFFER) != EOF) {
+		switch(BUFFER[0]){
+			case 'D':
+				type = DECODER;
+				break;
+			case 'M':
+				type = MULTIPLEXER;
+				break;
+			case 'N':
+				if(BUFFER[2] == 'T') type = NOT;
+				else if(BUFFER[2] == 'N') type = NAND;
+				else type = NOR;
+				break;
+			case 'P':
+				type = PASS;
+				break;
+			case 'O':
+				type = OR;
+				break;
+			case 'A':
+				type = AND;
+				break;
+			case 'X':
+				type = XOR;
+				break;
+		}
+		*Indirect = malloc(sizeof(struct Gate));
+		(*Indirect)->next = NULL;
+		(*Indirect)->type = type;
+
+		if(type < 2){
+			(*Indirect)->NumOfIn = 1;
+			(*Indirect)->NumOfOut = 1;
+		}
+		else if(type < 7){
+			(*Indirect)->NumOfIn = 2;
+			(*Indirect)->NumOfOut = 1;
+		}
+		else {
+			int inputs;
+			fscanf(fp, "%d", &inputs);
+			if(type == DECODER){
+				(*Indirect)->NumOfIn = inputs;
+				(*Indirect)->NumOfOut = Pow(2, inputs);
+			}
+			else {
+				(*Indirect)->NumOfIn = (inputs + Pow(2, inputs));
+				(*Indirect)->NumOfOut = 1;
+			}
+		}
+
+		(*Indirect)->inparam = malloc(sizeof(int*) * ((*Indirect)->NumOfIn));
+		int i, j;
+		for(i = 0; i < (*Indirect)->NumOfIn; ++i){
+			fscanf(fp, "%16s", BUFFER);
+			if(BUFFER[0] == '0') (*Indirect)->inparam[i] = &(binary[0]);
+			else if(BUFFER[0] == '1') (*Indirect)->inparam[i] = &(binary[1]);
+			else if (BUFFER[0] == '_') (*Indirect)->inparam[i] = &(binary[2]);
+			else {
+				for(j = 0; j < Table.TempEnd; ++j) {
+					if(StrComp(BUFFER, Table.Vars[j].VarName))
+						(*Indirect)->inparam[i] = &(Table.Vars[j].value);
+				}
+			}
+		}
+		(*Indirect)->outparam = malloc(sizeof(int*) * ((*Indirect)->NumOfOut));
+		for(i = 0; i < (*Indirect)->NumOfOut; ++i){
+			fscanf(fp, "%16s", BUFFER);
+			if(BUFFER[0] == '0') (*Indirect)->outparam[i] = &(binary[0]);
+			else if(BUFFER[0] == '1') (*Indirect)->outparam[i] = &(binary[1]);
+			else if (BUFFER[0] == '_') (*Indirect)->outparam[i] = &(binary[2]);
+			else {
+				for(j = 0; j < Table.TempEnd; ++j) {
+					if(StrComp(BUFFER, Table.Vars[j].VarName))
+						(*Indirect)->outparam[i] = &(Table.Vars[j].value);
+				}
+			}
+		}
+		Indirect = &((*Indirect)->next);
+	}
+		return;
+}
+
+void DoCircuit(struct Gate *First, struct VarTable Table)
+{
+	while(First != NULL){
+		switch(First->type){
+			case 0:
+				break;
+			case 1:
+				break;
+			case 2:
+				break;
+			case 3:
+				break;
+			case 4:
+				break;
+			case 5:
+				break;
+			case 6:
+				break;
+			case 7:
+				break;
+			case 8:
+				break;	
+
+		}
+		First = First->next;
+	}
+	PrintTableValues(Table);
+}
+
+void Solve_Truth_Table(struct Gate *First, struct VarTable Table)
+{
+	int i,start = (Table.InputEnd-1);
+	// Do the case where all Inputs are 0
+	DoCircuit(First, Table);
+
+	// Then enter the loop where we start putting 1s for inputs
+	for(i = start; i >= 0; --i){
+
+		if(Table.Vars[i].value == 0){
+			Table.Vars[i].value = 1;
+			i = start + 1;
+		}
+
+		else if(Table.Vars[i].value == 1)
+			Table.Vars[i].value = 0;
+		
+		if(i == start + 1) DoCircuit(First, Table); 
+
+	}
+
+}
+
+// ====================================== End Of Main Functions ====================================================
 
 int main(int argc, char *argv[])
 {
@@ -208,11 +363,20 @@ int main(int argc, char *argv[])
 	struct VarTable Table;
 	ReadIOVars(&Table, &fp);
 	puts("Read IO Vars");
+	
 	Search_For_Temps(&Table, fp);
 	puts("Read all temps");
+	
 	PrintTableVars(Table);
+	
 	struct Gate *First = malloc(sizeof(struct Gate));
-	CreateGates(&First);
+	int binary[] = {0 , 1, -1};
+	rewind(fp);
+	CreateGates(&First, Table, binary, fp);
+	//PrintGates(First);
+	//PrintTableValues(Table);
+	Solve_Truth_Table(First, Table);	
 	fclose(fp);
 
+	return 0;
 }
