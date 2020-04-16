@@ -71,6 +71,26 @@ void StrCopy(char *src, char *dest)
 	dest[i] = '\0';
 }
 
+void FreeTable(struct VarTable Table)
+{
+	int i;
+	for(i = 0; i < Table.TempEnd; ++i)
+		free(Table.Vars[i].VarName);
+
+	free(Table.Vars);
+}
+
+void FreeGates(struct Gate *List)
+{
+	struct Gate *temp;
+	while(List != NULL){
+		temp = List;
+		List = List->next;
+		free(temp);
+	}
+}
+
+
 /** Math Power Function. Base ^ Exponent */
 int Pow(int Base, int Exponent)
 {
@@ -395,6 +415,8 @@ int main(int argc, char *argv[])
 	//PrintTableValues(Table);
 	Solve_Truth_Table(First, Table);	
 	fclose(fp);
-
+	
+	FreeTable(Table);
+	FreeGates(First);
 	return 0;
 }
