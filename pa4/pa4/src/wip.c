@@ -200,17 +200,19 @@ void Search_For_Temps(struct VarTable *Table, FILE *fp)
 	}
 	return;
 }
-
+/** Create Logic gate Structs as a Linked List */
 void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *fp)
 {
 	struct Gate **Indirect = First;
 	char BUFFER[17];
 	kind_t type;
-	// Skip the first two lines.
+	// Skip the first two lines of the file.
 	char SKIP[16384];
 	fgets(SKIP, 16384, fp);
 	fgets(SKIP, 16384, fp);
+
 	while(fscanf(fp, "%16s", BUFFER) != EOF) {
+		// Find what type of gate it is
 		switch(BUFFER[0]){
 			case 'D':
 				type = DECODER;
@@ -236,10 +238,12 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 				type = XOR;
 				break;
 		}
+
 		*Indirect = malloc(sizeof(struct Gate));
 		(*Indirect)->next = NULL;
 		(*Indirect)->type = type;
-
+		
+		// Based on it's type we can easily decifer how many inputs and outputs the gate will have.
 		if(type < 2){
 			(*Indirect)->NumOfIn = 1;
 			(*Indirect)->NumOfOut = 1;
@@ -248,6 +252,7 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 			(*Indirect)->NumOfIn = 2;
 			(*Indirect)->NumOfOut = 1;
 		}
+		// A decoder and multiplexer requires a little more work to work out how many ins and outs it has.
 		else {
 			int inputs;
 			fscanf(fp, "%d", &inputs);
@@ -261,10 +266,15 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 			}
 		}
 
+		// Begin allocating space for our input parameters. The array will be int pointers so that we can refer to the
+		// master variable table and quickly pull what value is currently stored there.
 		(*Indirect)->inparam = malloc(sizeof(int*) * ((*Indirect)->NumOfIn));
 		int i, j;
+		// Scan through the file and store those variables
 		for(i = 0; i < (*Indirect)->NumOfIn; ++i){
 			fscanf(fp, "%16s", BUFFER);
+			// If it is a '0' , '1' , or '_' then point to the special case "binary" array. This array contains 0, 1,
+			// and -1 for their respective symbols.
 			if(BUFFER[0] == '0') (*Indirect)->inparam[i] = &(binary[0]);
 			else if(BUFFER[0] == '1') (*Indirect)->inparam[i] = &(binary[1]);
 			else if (BUFFER[0] == '_') (*Indirect)->inparam[i] = &(binary[2]);
@@ -275,6 +285,8 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 				}
 			}
 		}
+
+		// Allocate space for pointers to our output variables using the same ideas as above.
 		(*Indirect)->outparam = malloc(sizeof(int*) * ((*Indirect)->NumOfOut));
 		for(i = 0; i < (*Indirect)->NumOfOut; ++i){
 			fscanf(fp, "%16s", BUFFER);
@@ -288,6 +300,8 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 				}
 			}
 		}
+
+		// Once finished, move on to the next directive.
 		Indirect = &((*Indirect)->next);
 	}
 		return;
@@ -328,17 +342,21 @@ void Solve_Truth_Table(struct Gate *First, struct VarTable Table)
 	// Do the case where all Inputs are 0
 	DoCircuit(First, Table);
 
-	// Then enter the loop where we start putting 1s for inputs
+	// Then enter the loop where we start putting 1s for inputs while working from right to left.
+	// So if we had x, y, z as inputs, z would become 1 and then y and then x.
 	for(i = start; i >= 0; --i){
-
+		
+		// If the current variable is a 0, flip it to 1 and reset back to the first var.
 		if(Table.Vars[i].value == 0){
 			Table.Vars[i].value = 1;
 			i = start + 1;
 		}
-
+		
+		// If the current variable is a 1, we can flip the bit and move to next var as if we were to "carry" in addition
 		else if(Table.Vars[i].value == 1)
 			Table.Vars[i].value = 0;
 		
+		// If we did flip a bit and restart, that means we have yet to get to the last bit so do the circuit.
 		if(i == start + 1) DoCircuit(First, Table); 
 
 	}
