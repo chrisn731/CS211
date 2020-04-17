@@ -6,8 +6,8 @@ typedef enum { PASS, NOT, AND, NAND, NOR, OR, XOR, DECODER, MULTIPLEXER } kind_t
 // The master Variable table is made up of Variables. A single variable contains the variable name,
 // the index of it in the current Table, and the value it is currently holding.
 struct Variable {
-	char	*VarName;
-	int	index;
+	char *VarName;
+	int index;
 	int value;
 };
 
@@ -27,10 +27,10 @@ struct VarTable {
  * type : 0-11 value that will allow us to quickly decifer what gate it is.
  */
 struct Gate {
-	int	**inparam;
+	int **inparam;
 	int **outparam;
 	struct Gate *next;
-	int	NumOfIn;
+	int NumOfIn;
 	int NumOfOut;
 	kind_t type;
 };
@@ -79,7 +79,6 @@ void FreeGates(struct Gate *List)
 		free(temp);
 	}
 }
-
 
 /** Math Power Function. Base ^ Exponent */
 int Pow(int Base, int Exponent)
@@ -149,6 +148,7 @@ void PrintGates(struct Gate *First)
 // ====================================== End Of Utility Functions ====================================================
 
 // ======================================= Start of Main Functions ====================================================
+/** Read the first two lines of the input file, getting all the basic Input/Output Variables adding them to the Table. */
 void ReadIOVars(struct VarTable *Table, FILE **fp)
 {
 	// Scan the 'INPUT' string
@@ -186,6 +186,8 @@ void ReadIOVars(struct VarTable *Table, FILE **fp)
 	return;
 }
 
+/** Continue from where I/O Vars left off. Searching through the directives to find any temporary variables appending
+ * them to the Variable Table. */
 void Search_For_Temps(struct VarTable *Table, FILE *fp)
 {
 	char BUFFER[17];
@@ -209,12 +211,11 @@ void Search_For_Temps(struct VarTable *Table, FILE *fp)
 			}
 			
 		}
+		// If it's not the previous choices, it must have only 2 inputs and 1 output.
 		else {
 			NumOfIn = 2;
 			NumOfOut = 1;
 		}
-		// If its not the previous options it must have 2 Inputs and 1 Output
-		
 		
 		// Go through our current Variables and see if we already have that Variable.
 		// If not, append it to our table.
@@ -239,7 +240,8 @@ void Search_For_Temps(struct VarTable *Table, FILE *fp)
 	}
 	return;
 }
-/** Create Logic gate Structs as a Linked List */
+
+/** Create the Logic Gates using a Linked List Data Structure to link them together. */
 void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *fp)
 {
 	struct Gate **Indirect = First;
@@ -353,9 +355,10 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 		return;
 }
 
-/** This function actually runs through the gates and attempts to solve for the truthtable. */
+/** This function runs through the gates and attempts to solve for the truthtable. */
 void DoCircuit(struct Gate *First, struct VarTable Table)
 {
+	// Keep looping until we have no more gates.
 	while(First != NULL){
 		switch(First->type){
 			// PASS
@@ -411,7 +414,8 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 
 					++incrementer;
 				}
-				First->outparam[bit][0] = 1;
+				// Discard our answer if that position holds a -1 representing a '_'
+				if(!(First->outparam[bit][0] == -1)) First->outparam[bit][0] = 1;
 				break;
 			}	
 			// MULTIPLEXER
@@ -430,9 +434,11 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 				break;
 			}
 		}
+		// Go to the following gate.
 		First = First->next;
 	}
 	PrintTableValues(Table);
+	return;
 }
 
 void Solve_Truth_Table(struct Gate *First, struct VarTable Table)
@@ -463,7 +469,7 @@ void Solve_Truth_Table(struct Gate *First, struct VarTable Table)
 		}
 
 	}
-
+	return;
 }
 
 // ====================================== End Of Main Functions ====================================================
@@ -496,7 +502,9 @@ int main(int argc, char *argv[])
 	CreateGates(&First, Table, binary, fp);
 	//PrintGates(First);
 	//PrintTableValues(Table);
+
 	Solve_Truth_Table(First, Table);	
+
 	fclose(fp);
 	FreeTable(Table);
 	FreeGates(First);
