@@ -49,26 +49,27 @@ int XOR(int input1, int input2){}
 // ====================================== Utility Functions ====================================================
 
 /** String Compare Method */
-int StrComp(char *tocomp, char *given)
+int StrComp(char *p1, char *p2)
 {
-	int i = 0;
-	while(tocomp[i] != '\0'){
-		if(tocomp[i] != given[i])
-			return 0;
-		++i;
-	}
-	return 1;
+	char c1, c2;
+	do {
+		c1 = *p1++;
+		c2 = *p2++;
+		if(c1 == '\0')
+			return c1 - c2;
+	} while(c1 == c2);
+
+	return c1 - c2;
 }
 
 /** String Copy */
 void StrCopy(char *src, char *dest)
 {
-	int i = 0;
-	while(src[i] != '\0'){
-		dest[i] = src[i];
-		++i;
-	}
-	dest[i] = '\0';
+	char c1;
+	do {
+		c1 = *src++;
+		*dest++ = c1;
+	} while(c1 != '\0');
 }
 
 void FreeTable(struct VarTable Table)
@@ -140,6 +141,8 @@ void PrintAllTableValues(struct VarTable Table)
 	for(; i < Table.OutputEnd; ++i){
 		 printf("%d ", Table.Vars[i].value);
 	}
+
+	printf("| ");
 
 	for(; i < Table.TempEnd; ++i)
 		printf("%d ", Table.Vars[i].value);
@@ -231,7 +234,7 @@ void Search_For_Temps(struct VarTable *Table, FILE *fp)
 			fscanf(fp, "%16s", BUFFER);
 			if( !(BUFFER[0] == '1' || BUFFER[0] == '0' || BUFFER[0] == '_') ){
 				for(j = 0; j < Table->TempEnd; ++j){
-					if(StrComp(BUFFER, Table->Vars[j].VarName))
+					if(!StrComp(BUFFER, Table->Vars[j].VarName))
 						break;
 				}
 				if(j == Table->TempEnd) {
@@ -329,7 +332,7 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 			else if (BUFFER[0] == '_') (*Indirect)->inparam[i] = &(binary[2]);
 			else {
 				for(j = 0; j < Table.TempEnd; ++j) {
-					if(StrComp(BUFFER, Table.Vars[j].VarName))
+					if(!StrComp(BUFFER, Table.Vars[j].VarName))
 						(*Indirect)->inparam[i] = &(Table.Vars[j].value);
 				}
 			}
@@ -344,8 +347,10 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 			else if (BUFFER[0] == '_') (*Indirect)->outparam[i] = &(binary[2]);
 			else {
 				for(j = 0; j < Table.TempEnd; ++j) {
-					if(StrComp(BUFFER, Table.Vars[j].VarName))
+					if(!StrComp(BUFFER, Table.Vars[j].VarName)){
 						(*Indirect)->outparam[i] = &(Table.Vars[j].value);
+						break;
+					}
 				}
 			}
 		}
