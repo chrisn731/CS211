@@ -35,17 +35,6 @@ struct Gate {
 	kind_t type;
 };
 
-// Circuit Methods to be implmented
-/*
-int NOT(int input1){}
-int PASS(int input1){}
-int AND(int input1, int input2){}
-int OR(int input1, int input2){}
-int NAND(int input1, int input2){}
-int NOR(int input1, int input2){}
-int XOR(int input1, int input2){}
-*/
-
 // ====================================== Utility Functions ====================================================
 
 /** String Compare Method */
