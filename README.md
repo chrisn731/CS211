@@ -1,23 +1,23 @@
 # CS211
-##Hello, it's that time again.
+## Hello, it's that time again.
 
 This is a compilation of all the assignments given during Computer Architecture (CS211) Spring 2020 Semester.
 
 Inside this repo you will find 5 projects, all given during the semester. Feel free to browse and take in that delicious C.
 
-####pa1
+#### pa1
 A collection of small C assignments
 
-####pa2
+#### pa2
 AI/ML algorithm. A combonation of different matrix operations to predict house prices.
 
-####pa3
+#### pa3
 Bomb Lab. Look through x86 Intel Binary Code to defuse a bomb with 9 different stages that implement basic C functions and data structures.
 
-####pa4
+#### pa4
 Create a logic circuit based on digital logic. Read in a file that has multiple directives (logic gates) and produce a
 truth table.
 
-######RIP
+###### RIP
 > Pa5 was cancelled due to a world pandemic :(
 ~~pa5 - TBD~~
