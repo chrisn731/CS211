@@ -18,5 +18,5 @@ Bomb Lab. Look through x86 Intel Binary Code to defuse a bomb with 9 different s
 Create a logic circuit based on digital logic. Read in a file that has multiple directives (logic gates) and produce a
 truth table.
 
-###### ~~pa5~~
+#### ~~pa5~~
 Pa5 was cancelled due to a world pandemic :(
