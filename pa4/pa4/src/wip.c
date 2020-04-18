@@ -1,13 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+
 typedef enum { PASS, NOT, AND, NAND, NOR, OR, XOR, DECODER, MULTIPLEXER } kind_t;
 
 // The master Variable table is made up of Variables. A single variable contains the variable name,
 // the index of it in the current Table, and the value it is currently holding.
 struct Variable {
-	char	*VarName;
-	int	index;
+	char *VarName;
+	int index;
 	int value;
 };
 
@@ -27,48 +27,38 @@ struct VarTable {
  * type : 0-11 value that will allow us to quickly decifer what gate it is.
  */
 struct Gate {
-	int	**inparam;
+	int **inparam;
 	int **outparam;
 	struct Gate *next;
-	int	NumOfIn;
+	int NumOfIn;
 	int NumOfOut;
 	kind_t type;
 };
 
-// Circuit Methods to be implmented
-/*
-int NOT(int input1){}
-int PASS(int input1){}
-int AND(int input1, int input2){}
-int OR(int input1, int input2){}
-int NAND(int input1, int input2){}
-int NOR(int input1, int input2){}
-int XOR(int input1, int input2){}
-*/
-
 // ====================================== Utility Functions ====================================================
 
 /** String Compare Method */
-int StrComp(char *tocomp, char *given)
+int StrComp(char *p1, char *p2)
 {
-	int i = 0;
-	while(tocomp[i] != '\0'){
-		if(tocomp[i] != given[i])
-			return 0;
-		++i;
-	}
-	return 1;
+	char c1, c2;
+	do {
+		c1 = *p1++;
+		c2 = *p2++;
+		if(c1 == '\0')
+			return c1 - c2;
+	} while(c1 == c2);
+
+	return c1 - c2;
 }
 
 /** String Copy */
 void StrCopy(char *src, char *dest)
 {
-	int i = 0;
-	while(src[i] != '\0'){
-		dest[i] = src[i];
-		++i;
-	}
-	dest[i] = '\0';
+	char c1;
+	do {
+		c1 = *src++;
+		*dest++ = c1;
+	} while(c1 != '\0');
 }
 
 void FreeTable(struct VarTable Table)
@@ -89,7 +79,6 @@ void FreeGates(struct Gate *List)
 		free(temp);
 	}
 }
-
 
 /** Math Power Function. Base ^ Exponent */
 int Pow(int Base, int Exponent)
@@ -159,6 +148,7 @@ void PrintGates(struct Gate *First)
 // ====================================== End Of Utility Functions ====================================================
 
 // ======================================= Start of Main Functions ====================================================
+/** Read the first two lines of the input file, getting all the basic Input/Output Variables adding them to the Table. */
 void ReadIOVars(struct VarTable *Table, FILE **fp)
 {
 	// Scan the 'INPUT' string
@@ -196,6 +186,8 @@ void ReadIOVars(struct VarTable *Table, FILE **fp)
 	return;
 }
 
+/** Continue from where I/O Vars left off. Searching through the directives to find any temporary variables appending
+ * them to the Variable Table. */
 void Search_For_Temps(struct VarTable *Table, FILE *fp)
 {
 	char BUFFER[17];
@@ -219,12 +211,11 @@ void Search_For_Temps(struct VarTable *Table, FILE *fp)
 			}
 			
 		}
+		// If it's not the previous choices, it must have only 2 inputs and 1 output.
 		else {
 			NumOfIn = 2;
 			NumOfOut = 1;
 		}
-		// If its not the previous options it must have 2 Inputs and 1 Output
-		
 		
 		// Go through our current Variables and see if we already have that Variable.
 		// If not, append it to our table.
@@ -233,7 +224,7 @@ void Search_For_Temps(struct VarTable *Table, FILE *fp)
 			fscanf(fp, "%16s", BUFFER);
 			if( !(BUFFER[0] == '1' || BUFFER[0] == '0' || BUFFER[0] == '_') ){
 				for(j = 0; j < Table->TempEnd; ++j){
-					if(!strcmp(BUFFER, Table->Vars[j].VarName))
+					if(!StrComp(BUFFER, Table->Vars[j].VarName))
 						break;
 				}
 				if(j == Table->TempEnd) {
@@ -249,7 +240,8 @@ void Search_For_Temps(struct VarTable *Table, FILE *fp)
 	}
 	return;
 }
-/** Create Logic gate Structs as a Linked List */
+
+/** Create the Logic Gates using a Linked List Data Structure to link them together. */
 void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *fp)
 {
 	struct Gate **Indirect = First;
@@ -331,7 +323,7 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 			else if (BUFFER[0] == '_') (*Indirect)->inparam[i] = &(binary[2]);
 			else {
 				for(j = 0; j < Table.TempEnd; ++j) {
-					if(!strcmp(BUFFER, Table.Vars[j].VarName))
+					if(!StrComp(BUFFER, Table.Vars[j].VarName))
 						(*Indirect)->inparam[i] = &(Table.Vars[j].value);
 				}
 			}
@@ -346,7 +338,7 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 			else if (BUFFER[0] == '_') (*Indirect)->outparam[i] = &(binary[2]);
 			else {
 				for(j = 0; j < Table.TempEnd; ++j) {
-					if(!strcmp(BUFFER, Table.Vars[j].VarName)){
+					if(!StrComp(BUFFER, Table.Vars[j].VarName)){
 						(*Indirect)->outparam[i] = &(Table.Vars[j].value);
 						break;
 					}
@@ -363,9 +355,10 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 		return;
 }
 
-/** This function actually runs through the gates and attempts to solve for the truthtable. */
+/** This function runs through the gates and attempts to solve for the truthtable. */
 void DoCircuit(struct Gate *First, struct VarTable Table)
 {
+	// Keep looping until we have no more gates.
 	while(First != NULL){
 		switch(First->type){
 			// PASS
@@ -421,7 +414,8 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 
 					++incrementer;
 				}
-				First->outparam[bit][0] = 1;
+				// Discard our answer if that position holds a -1 representing a '_'
+				if(!(First->outparam[bit][0] == -1)) First->outparam[bit][0] = 1;
 				break;
 			}	
 			// MULTIPLEXER
@@ -440,9 +434,39 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 				break;
 			}
 		}
+		// Go to the following gate.
 		First = First->next;
 	}
 	PrintTableValues(Table);
+	return;
+}
+
+void SortGates(struct Gate **First, struct VarTable Table)
+{
+	while(*First != NULL) {
+		int i;
+		for(i = 0; i < (*First)->NumOfIn; ++i){
+			int *TempAddr = (*First)->inparam[i], j;
+			for(j = Table.OutputEnd; j < Table.TempEnd; ++j){
+				if(TempAddr == &(Table.Vars[i].value) && Table.Vars[i].value == 0){
+					Table.Vars[i].value = 1;
+					struct Gate **swap = &((*First)->next);
+					while(*swap != NULL){
+						int k;
+						for(k = 0; k < ((*swap)->NumOfOut); ++k){
+							if((*swap)->outparam[k][0] == 1)
+								break;
+						}
+						if((*swap)->outparam[k][0] == 1)
+							break;
+					}
+					struct Gate **temp = First;
+					*First = *swap;
+					*swap = *temp;
+				}
+			}
+		}
+	}
 }
 
 void Solve_Truth_Table(struct Gate *First, struct VarTable Table)
@@ -473,7 +497,7 @@ void Solve_Truth_Table(struct Gate *First, struct VarTable Table)
 		}
 
 	}
-
+	return;
 }
 
 // ====================================== End Of Main Functions ====================================================
@@ -506,7 +530,9 @@ int main(int argc, char *argv[])
 	CreateGates(&First, Table, binary, fp);
 	//PrintGates(First);
 	//PrintTableValues(Table);
+
 	Solve_Truth_Table(First, Table);	
+
 	fclose(fp);
 	FreeTable(Table);
 	FreeGates(First);

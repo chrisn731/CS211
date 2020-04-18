@@ -424,7 +424,9 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 					++incrementer;
 				}
 				// Discard our answer if that position holds a -1 representing a '_'
-				if(!(First->outparam[bit][0] == -1)) First->outparam[bit][0] = 1;
+				if(!(First->outparam[bit][0] == -1))
+					First->outparam[bit][0] = 1;
+
 				break;
 			}	
 			// MULTIPLEXER
@@ -454,6 +456,7 @@ void SortGates(struct Gate **First, struct VarTable Table)
 {
 	int i;
 	while(*First != NULL) {
+		//printf("Gate is of type: %d\n", (*First)->type);
 		// Iterate through all inputs of the gate and check for Multiplexer special case
 		int NumOfIn = ((*First)->type == 8) ? ((*First)->NumOfIn + Pow(2, (*First)->NumOfIn)) : (*First)->NumOfIn;
 
@@ -467,20 +470,25 @@ void SortGates(struct Gate **First, struct VarTable Table)
 					//puts("POINTERS MATCH!");
 					Table.Vars[j].value = 1;
 					struct Gate **swap = &((*First)->next);
-
+					
+					// Go through the remaining gates and swap with a gate if the gate contains the temporary variable
+					// in its output.
 					while(*swap != NULL){
 						int k, found = 0;
-						//printf("This gate is of type %d\n", (*swap)->type);
-
+						
+						// Check if the current gate holds that flagged variable.
 						for(k = 0; k < ((*swap)->NumOfOut); ++k){
 							if((*swap)->outparam[k][0] == 1){
 								found = 1;
-								break
+								break;
 							}
 						}
-
+						
+						// If found, swap the gates, else go to the next gate.
 						if(found){
+							//printf("Swap gate is of type %d\n", (*swap)->type);
 							// Swap the pointers...
+							//puts("Swapping pointers...");
 							struct Gate *temp = *First;
 							*First = *swap;
 							struct Gate *temp2 = (*swap)->next;
@@ -494,7 +502,6 @@ void SortGates(struct Gate **First, struct VarTable Table)
 				}
 			}
 		}
-		//printf("going to next gate of type %d\n", (*First)->type);
 		First = &((*First)->next);
 	}
 	// Reset values of the Table
