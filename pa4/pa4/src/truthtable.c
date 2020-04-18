@@ -85,7 +85,8 @@ int Pow(int Base, int Exponent)
 {
 	int i, total = Base;
 	if(Exponent == 0) return 1;
-	for(i = 1; i < Exponent; ++i) total *= Base;
+	for(i = 1; i < Exponent; ++i)
+		total *= Base;
 	return total;
 }
 
@@ -373,35 +374,43 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 
 			// AND
 			case 2:
-				if(First->inparam[0][0] == 1 && First->inparam[1][0] == 1) First->outparam[0][0] = 1;
-				else First->outparam[0][0] = 0;
+				if(First->inparam[0][0] == 1 && First->inparam[1][0] == 1)
+					First->outparam[0][0] = 1;
+				else
+					First->outparam[0][0] = 0;
 				break;
 
 			// NAND
 			case 3:
-				if(First->inparam[0][0] == 1 && First->inparam[1][0] == 1) First->outparam[0][0] = 0;
-				else First->outparam[0][0] = 1;
+				if(First->inparam[0][0] == 1 && First->inparam[1][0] == 1)
+					First->outparam[0][0] = 0;
+				else
+					First->outparam[0][0] = 1;
 				break;
 
 			// NOR
 			case 4:
-				if(First->inparam[0][0] == 1 || First->inparam[1][0] == 1) First->outparam[0][0] = 0;
-				else First->outparam[0][0] = 1;
+				if(First->inparam[0][0] == 1 || First->inparam[1][0] == 1)
+					First->outparam[0][0] = 0;
+				else
+					First->outparam[0][0] = 1;
 				break;
 
 			// OR
 			case 5:
-				if(First->inparam[0][0] == 1 || First->inparam[1][0] == 1) First->outparam[0][0] = 1;
-				else First->outparam[0][0] = 0;
+				if(First->inparam[0][0] == 1 || First->inparam[1][0] == 1)
+					First->outparam[0][0] = 1;
+				else
+					First->outparam[0][0] = 0;
 				break;
 
 			// XOR
 			case 6:
 				if( (First->inparam[0][0] == 1 && First->inparam[1][0] == 0) || 
-					(First->inparam[0][0] == 0 && First->inparam[1][0] == 1)){
+					(First->inparam[0][0] == 0 && First->inparam[1][0] == 1))
 						First->outparam[0][0] = 1;
-				}
-				else First->outparam[0][0] = 0;
+				else
+					First->outparam[0][0] = 0;
 				break;
 
 			// DECODER
@@ -441,6 +450,59 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 	return;
 }
 
+void SortGates(struct Gate **First, struct VarTable Table)
+{
+	int i;
+	while(*First != NULL) {
+		// Iterate through all inputs of the gate and check for Multiplexer special case
+		int NumOfIn = ((*First)->type == 8) ? ((*First)->NumOfIn + Pow(2, (*First)->NumOfIn)) : (*First)->NumOfIn;
+
+		for(i = 0; i < NumOfIn; ++i){
+			int *TempAddr = (*First)->inparam[i], j;
+			// Go through all the Temporary Variables
+			for(j = Table.OutputEnd; j < Table.TempEnd; ++j){
+				int *TableAddr = &(Table.Vars[j].value);
+				if(TempAddr == TableAddr && Table.Vars[j].value == 0){
+
+					//puts("POINTERS MATCH!");
+					Table.Vars[j].value = 1;
+					struct Gate **swap = &((*First)->next);
+
+					while(*swap != NULL){
+						int k, found = 0;
+						//printf("This gate is of type %d\n", (*swap)->type);
+
+						for(k = 0; k < ((*swap)->NumOfOut); ++k){
+							if((*swap)->outparam[k][0] == 1){
+								found = 1;
+								break
+							}
+						}
+
+						if(found){
+							// Swap the pointers...
+							struct Gate *temp = *First;
+							*First = *swap;
+							struct Gate *temp2 = (*swap)->next;
+							(*swap)->next = temp;
+							*swap = temp2;
+							break;
+						}
+						else
+							swap = &((*swap)->next);
+					}
+				}
+			}
+		}
+		//printf("going to next gate of type %d\n", (*First)->type);
+		First = &((*First)->next);
+	}
+	// Reset values of the Table
+	for(i = 0; i < Table.TempEnd; ++i)
+		Table.Vars[i].value = 0;
+	return;
+}
+
 void Solve_Truth_Table(struct Gate *First, struct VarTable Table)
 {
 	int i,start = (Table.InputEnd-1);
@@ -464,7 +526,8 @@ void Solve_Truth_Table(struct Gate *First, struct VarTable Table)
 		// If we did flip a bit and restart, that means we have yet to get to the last bit so do the circuit.
 		if(i == start + 1){
 			int j;
-			for(j = Table.InputEnd; j < Table.TempEnd; ++j) Table.Vars[j].value = 0;
+			for(j = Table.InputEnd; j < Table.TempEnd; ++j)
+				Table.Vars[j].value = 0;
 			DoCircuit(First, Table); 
 		}
 
@@ -502,7 +565,9 @@ int main(int argc, char *argv[])
 	CreateGates(&First, Table, binary, fp);
 	//PrintGates(First);
 	//PrintTableValues(Table);
-
+	SortGates(&First, Table);
+	//puts("After Sorting...");
+	//PrintGates(First);
 	Solve_Truth_Table(First, Table);	
 
 	fclose(fp);
