@@ -19,5 +19,5 @@ Create a logic circuit based on digital logic. Read in a file that has multiple 
 truth table.
 
 ###### RIP
-> Pa5 was cancelled due to a world pandemic :(
+Pa5 was cancelled due to a world pandemic :(
 ~~pa5 - TBD~~
