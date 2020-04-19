@@ -84,9 +84,12 @@ void FreeGates(struct Gate *List)
 int Pow(int Base, int Exponent)
 {
 	int i, total = Base;
-	if(Exponent == 0) return 1;
+	if(Exponent == 0)
+		return 1;
+
 	for(i = 1; i < Exponent; ++i)
 		total *= Base;
+
 	return total;
 }
 
@@ -95,8 +98,10 @@ void PrintTableVars(struct VarTable Table)
 {
 	int i;
 	puts("All found Varibales:");
+
 	for(i = 0; i < Table.TempEnd; ++i)
 		printf("%s\n", Table.Vars[i].VarName);
+
 	puts("End of Variable Dump");
 }
 
@@ -127,14 +132,15 @@ void PrintAllTableValues(struct VarTable Table)
 
 	printf("| ");
 
-	for(; i < Table.OutputEnd; ++i){
+	for(; i < Table.OutputEnd; ++i)
 		 printf("%d ", Table.Vars[i].value);
-	}
+	
 
 	printf("| ");
 
 	for(; i < Table.TempEnd; ++i)
 		printf("%d ", Table.Vars[i].value);
+
 	printf("\n");
 }
 
@@ -319,9 +325,15 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 			fscanf(fp, "%16s", BUFFER);
 			// If it is a '0' , '1' , or '_' then point to the special case "binary" array. This array contains 0, 1,
 			// and -1 for their respective symbols.
-			if(BUFFER[0] == '0') (*Indirect)->inparam[i] = &(binary[0]);
-			else if(BUFFER[0] == '1') (*Indirect)->inparam[i] = &(binary[1]);
-			else if (BUFFER[0] == '_') (*Indirect)->inparam[i] = &(binary[2]);
+			if(BUFFER[0] == '0')
+				(*Indirect)->inparam[i] = &(binary[0]);
+
+			else if(BUFFER[0] == '1')
+				(*Indirect)->inparam[i] = &(binary[1]);
+
+			else if (BUFFER[0] == '_')
+				(*Indirect)->inparam[i] = &(binary[2]);
+
 			else {
 				for(j = 0; j < Table.TempEnd; ++j) {
 					if(!StrComp(BUFFER, Table.Vars[j].VarName))
@@ -334,9 +346,16 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 		(*Indirect)->outparam = malloc(sizeof(int*) * ((*Indirect)->NumOfOut));
 		for(i = 0; i < (*Indirect)->NumOfOut; ++i){
 			fscanf(fp, "%16s", BUFFER);
-			if(BUFFER[0] == '0') (*Indirect)->outparam[i] = &(binary[0]);
-			else if(BUFFER[0] == '1') (*Indirect)->outparam[i] = &(binary[1]);
-			else if (BUFFER[0] == '_') (*Indirect)->outparam[i] = &(binary[2]);
+
+			if(BUFFER[0] == '0')
+				(*Indirect)->outparam[i] = &(binary[0]);
+
+			else if(BUFFER[0] == '1')
+				(*Indirect)->outparam[i] = &(binary[1]);
+
+			else if (BUFFER[0] == '_')
+				(*Indirect)->outparam[i] = &(binary[2]);
+		
 			else {
 				for(j = 0; j < Table.TempEnd; ++j) {
 					if(!StrComp(BUFFER, Table.Vars[j].VarName)){
@@ -348,7 +367,8 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 		}
 
 		// Just to make life simpler, I want the input # of the Multiplexer, not input total.
-		if(temp != 0) (*Indirect)->NumOfIn = temp;
+		if(temp != 0)
+			(*Indirect)->NumOfIn = temp;
 
 		// Once finished, move on to the next directive.
 		Indirect = &((*Indirect)->next);
@@ -507,6 +527,7 @@ void SortGates(struct Gate **First, struct VarTable Table)
 	// Reset values of the Table
 	for(i = 0; i < Table.TempEnd; ++i)
 		Table.Vars[i].value = 0;
+
 	return;
 }
 
@@ -535,6 +556,7 @@ void Solve_Truth_Table(struct Gate *First, struct VarTable Table)
 			int j;
 			for(j = Table.InputEnd; j < Table.TempEnd; ++j)
 				Table.Vars[j].value = 0;
+
 			DoCircuit(First, Table); 
 		}
 
@@ -570,6 +592,7 @@ int main(int argc, char *argv[])
 	int binary[] = {0 , 1, -1};
 	rewind(fp);
 	CreateGates(&First, Table, binary, fp);
+	fclose(fp);
 	//PrintGates(First);
 	//PrintTableValues(Table);
 	SortGates(&First, Table);
@@ -577,7 +600,6 @@ int main(int argc, char *argv[])
 	//PrintGates(First);
 	Solve_Truth_Table(First, Table);	
 
-	fclose(fp);
 	FreeTable(Table);
 	FreeGates(First);
 	return 0;
