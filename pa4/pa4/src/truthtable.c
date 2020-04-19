@@ -190,7 +190,6 @@ void ReadIOVars(struct VarTable *Table, FILE **fp)
 		Table->Vars[i].index = i;
 		Table->Vars[i].value = 0;
 	}
-	return;
 }
 
 /** Continue from where I/O Vars left off. Searching through the directives to find any temporary variables appending
@@ -245,7 +244,6 @@ void Search_For_Temps(struct VarTable *Table, FILE *fp)
 			}
 		}
 	}
-	return;
 }
 
 /** Create the Logic Gates using a Linked List Data Structure to link them together. */
@@ -373,7 +371,6 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 		// Once finished, move on to the next directive.
 		Indirect = &((*Indirect)->next);
 	}
-		return;
 }
 
 /** This function runs through the gates and attempts to solve for the truthtable. */
@@ -469,7 +466,6 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 		First = First->next;
 	}
 	PrintTableValues(Table);
-	return;
 }
 
 void SortGates(struct Gate **First, struct VarTable Table)
@@ -528,7 +524,6 @@ void SortGates(struct Gate **First, struct VarTable Table)
 	for(i = 0; i < Table.TempEnd; ++i)
 		Table.Vars[i].value = 0;
 
-	return;
 }
 
 void Solve_Truth_Table(struct Gate *First, struct VarTable Table)
@@ -561,7 +556,6 @@ void Solve_Truth_Table(struct Gate *First, struct VarTable Table)
 		}
 
 	}
-	return;
 }
 
 // ====================================== End Of Main Functions ====================================================
