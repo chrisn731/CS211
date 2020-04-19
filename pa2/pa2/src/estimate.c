@@ -48,16 +48,17 @@ void FreeMatrix(struct Matrix A)
 }
 
 /** Compare two strings against each other. */
-int StringCompare(char *word, char *against)
+int StringCompare(char *p1, char *p2)
 {
-    int i = 0;
-    while(word[i] != '\0') {
-        if(word[i] != against[i])
-            return 0;
+    char c1, c2;
+    do {
+		c1 = *p1++;
+		c2 = *p2++;
+		if(c1 == '\0')
+			return c1- c2;
+	} while (c1 == c2);
 
-        ++i;
-    }
-    return 1;
+	return c1 - c2;
 }
 
 /** Create a matrix given rows and cols.
@@ -126,7 +127,7 @@ char **sortFiles(char **file1, char **file2)
             exit(EXIT_FAILURE);
         }
 
-        if(StringCompare("data", FileType)){
+        if(!StringCompare("data", FileType)){
             inputread = 1;
             if(i == 1)
 		break;
@@ -136,7 +137,7 @@ char **sortFiles(char **file1, char **file2)
             i = -1;
         }
 
-        if(StringCompare("train", FileType)){
+        if(!StringCompare("train", FileType)){
             trainread = 1;
             if(i == 0)
 		continue;
