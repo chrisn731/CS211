@@ -130,6 +130,7 @@ char **sortFiles(char **file1, char **file2)
             inputread = 1;
             if(i == 1)
 				break;
+
             files[0] = *file2;
             files[1] = *file1;
             i = -1;
@@ -139,6 +140,7 @@ char **sortFiles(char **file1, char **file2)
             trainread = 1;
             if(i == 0)
 				continue;
+
             files[0] = *file2;
             files[1] = *file1;
         }
@@ -204,6 +206,7 @@ void PopulateMatricies(FILE **fp, int attributes, int numofhouses, struct Matrix
                 X->data[i][j] = 1;
             else {
                 fscanf(*fp, "%lf", &value);
+
                 if((j+1) == (attributes+2))
                     Y->data[i][0] = value;
                 else
@@ -222,6 +225,7 @@ void PopulateMatrix(FILE **fp, int attributes, int numofhouses, struct Matrix *X
         for(j = 0; j < (attributes + 1); ++j) {
             if(j == 0)
                 X->data[i][j] = 1;
+
             else {
                 fscanf(*fp, "%lf", &value);
                 X->data[i][j] = value;
