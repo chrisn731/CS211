@@ -20,7 +20,8 @@ struct Node *createNode(int value)
     return newnode;
 }
 
-int insert(struct Node **root, int value) {
+int insert(struct Node **root, int value)
+{
     // Iterate through the tree until we are NULL or find a duplicate value.
     while( (*root) != NULL) {
         if( (*root)->key == value)
@@ -33,7 +34,8 @@ int insert(struct Node **root, int value) {
     return 1;
 }
 
-void search(struct Node **root, int value){
+void search(struct Node **root, int value)
+{
     struct Node *searchnode = *root;
     while(searchnode != NULL){
         if(searchnode->key == value){
@@ -45,7 +47,8 @@ void search(struct Node **root, int value){
     printf("absent\n");
 }
 
-int delete(struct Node **root, int value){
+int delete(struct Node **root, int value)
+{
     // Iterate through the tree until we find the value
     while((*root) != NULL && (*root)->key != value) 
         root = ((*root)->key > value) ? &((*root)->left) : &((*root)->right);
@@ -80,7 +83,8 @@ int delete(struct Node **root, int value){
     return 1;
 }
 
-void print(struct Node *root) {
+void print(struct Node *root)
+{
     // Inorder traversal.
     if(root == NULL)
 		return;
@@ -93,7 +97,8 @@ void print(struct Node *root) {
 
 }
 
-int main() {
+int main()
+{
     char op;
     int value, nodecount = 0;
     struct Node *root = NULL;
