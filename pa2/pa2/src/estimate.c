@@ -129,7 +129,7 @@ char **sortFiles(char **file1, char **file2)
         if(StringCompare("data", FileType)){
             inputread = 1;
             if(i == 1)
-				break;
+			break;
 
             files[0] = *file2;
             files[1] = *file1;
@@ -139,7 +139,7 @@ char **sortFiles(char **file1, char **file2)
         if(StringCompare("train", FileType)){
             trainread = 1;
             if(i == 0)
-				continue;
+			continue;
 
             files[0] = *file2;
             files[1] = *file1;
