@@ -1,50 +1,56 @@
 #include <stdio.h>
 #include <string.h>
 
-int scanpalindrome(char* string, int strlen)
+int IsNotALetter(char c)
 {
-	int i = 0;
-	strlen--;
-	char endchar = string[strlen];
-	char beg = string[i];
+	if((c >= 0 && c <= 47) || (c >= 58 && c <= 64) || (c >= 91 && c <= 96))
+		return 1;
 
-	while(strlen > i) { 
-		if( (beg >= 0 && beg <= 47) || (beg >= 58 && beg <= 64) || (beg >= 91 && beg <= 96) ) {
-			i++;
-			beg = string[i];
-		}
-		else if( (endchar >= 0 && endchar <= 47) || (endchar >= 58 && endchar <= 64) || (endchar >= 91 && endchar <= 96)) {
-			strlen--;
-			endchar = string[strlen];
-		}
-		else if (endchar >= 97 && endchar <= 122)
-			endchar -= 32;
+	return 0;
+}
 
-		else if (beg >= 97 && beg <= 122)
-			beg -= 32;
+int scan(char *string, int strlen)
+{
+	char *endstring = &(string[strlen]);
+	char begin, end;
+	int halfway = strlen / 2;
+	do {
+		// Iterate through until you find a letter
+		do {
+			begin = *string++;
+		} while(IsNotALetter(begin));
+		
+		// Same idea as above
+		do {
+			end = *endstring--;
+		} while(IsNotALetter(end));
 
-		else if (beg != endchar)
+		// Keep the letters lowercase please :)
+		if (end >= 97 && end <= 122)
+			end -= 32;
+
+		// Same as above :)
+		if (begin >= 97 && begin <= 122)
+			begin -= 32;
+
+		if (begin != end)
 			return 0;
+			
+	} while (strlen-- > halfway);
 
-		else {
-			i++;
-			strlen--;
-			endchar = string[strlen];
-			beg = string[i];
-		}
-	}
 	return 1;
 }
 
-int main(int argc, char** argv)
+
+int main(int argc, char **argv)
 {
 	if(argc == 1 || argc > 2) 
 		return 1;
 
 	char *palindrome = argv[1];
-	int pallen = strlen(palindrome);
+	int strlength = strlen(palindrome);
 
-	if(scanpalindrome(palindrome, pallen))
+	if(scan(palindrome, strlength))
 		puts("yes");
 
 	else
