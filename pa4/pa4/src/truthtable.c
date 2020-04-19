@@ -268,9 +268,12 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 				type = MULTIPLEXER;
 				break;
 			case 'N':
-				if(BUFFER[2] == 'T') type = NOT;
-				else if(BUFFER[2] == 'N') type = NAND;
-				else type = NOR;
+				if(BUFFER[2] == 'T')
+					type = NOT;
+				else if(BUFFER[2] == 'N')
+					type = NAND;
+				else
+					type = NOR;
 				break;
 			case 'P':
 				type = PASS;
