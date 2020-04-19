@@ -133,7 +133,7 @@ int main()
                     printf("deleted\n");
 				}
 				else 
-                    printf("absent\n");
+					printf("absent\n");
             }
         }
     }
