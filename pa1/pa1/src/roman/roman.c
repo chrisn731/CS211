@@ -1,9 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
-void convert(int numtoconvert) {
-	
+void convert(int numtoconvert)
+{
 	int Mcount, CMcount, Dcount, CDcount, Ccount, XCcount, Lcount, XLcount, Xcount, IXcount, Vcount, IVcount, Icount;
 	Mcount = Dcount = Ccount = Lcount = Xcount = Vcount = Icount = CMcount = CDcount = XCcount = XLcount = IXcount = IVcount = 0;
 	int i;
@@ -90,9 +89,14 @@ void convert(int numtoconvert) {
 
 
 int main(int argc, char** argv) {
-	if(argc == 0) return 0;
+	if(argc == 0) 
+		return 1;
+	
 	int numtoconvert = atoi(argv[1]);
-	if(numtoconvert == 0) return 0;
+
+	if(numtoconvert == 0)
+		return 0;
+
 	convert(numtoconvert);	
 	return 0;
 }

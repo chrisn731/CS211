@@ -8,9 +8,12 @@ struct Node {
     struct Node *left, *right;
 };
 
-struct Node *createNode(int value){
+struct Node *createNode(int value)
+{
     struct Node *newnode = malloc(sizeof(struct Node));
-    if(newnode == NULL) exit(EXIT_FAILURE);
+    if(newnode == NULL)
+		exit(EXIT_FAILURE);
+
     newnode->key = value;
     newnode->right = NULL;
     newnode->left = NULL;
@@ -20,7 +23,9 @@ struct Node *createNode(int value){
 int insert(struct Node **root, int value) {
     // Iterate through the tree until we are NULL or find a duplicate value.
     while( (*root) != NULL) {
-        if( (*root)->key == value) return 0;
+        if( (*root)->key == value)
+			return 0;
+
         root = ((*root)->key > value) ? &((*root)->left) : &((*root)->right);
     }
 
@@ -42,11 +47,12 @@ void search(struct Node **root, int value){
 
 int delete(struct Node **root, int value){
     // Iterate through the tree until we find the value
-    while((*root) != NULL && (*root)->key != value) {
+    while((*root) != NULL && (*root)->key != value) 
         root = ((*root)->key > value) ? &((*root)->left) : &((*root)->right);
-    }
+    
     // If we didn't find our value return
-    if (*root == NULL) return 0;
+    if (*root == NULL)
+		return 0;
     
     // The current node we are on is our "delete" node.
     // If our "delete has 2 children then we must find a "child" node that we can replace with
@@ -56,9 +62,9 @@ int delete(struct Node **root, int value){
     // to be on the "child" node.
     if( (*root)->left != NULL && (*root)->right != NULL){
         struct Node **newval = &((*root)->left);
-        while((*newval)->right != NULL){
+
+        while((*newval)->right != NULL)
             newval = &((*newval)->right);
-        }
 
         (*root)->key = (*newval)->key;
         root = newval;
@@ -76,7 +82,9 @@ int delete(struct Node **root, int value){
 
 void print(struct Node *root) {
     // Inorder traversal.
-    if(root == NULL) return;
+    if(root == NULL)
+		return;
+
     printf("(");	
     print(root->left);
     printf("%i",root->key);
@@ -94,29 +102,33 @@ int main() {
         if(op == 'p') {
             print(root);
             printf("\n");
-        } else {
+        } 
+		else {
 
-            if(!scanf("%i", &value)) continue;
+            if(!scanf("%i", &value))
+				continue;
 
             if(op == 'i'){
 
                 if(insert(&root, value)){
                     nodecount++;
                     printf("inserted\n");
-                } else {
+				}
+				else
                     printf("not inserted\n");
-                }
+			}
 
-            } else if(op == 's'){
+            else if(op == 's')
                 search(&root, value);
-            } else if(op == 'd'){
+
+            else if(op == 'd'){
 
                 if(delete(&root, value)){
                     nodecount--;
                     printf("deleted\n");
-                } else {
+				}
+				else 
                     printf("absent\n");
-                }
             }
         }
     }

@@ -6,20 +6,26 @@ struct Node {
     struct Node *next;
 };
 
-struct Node *createNode(int value) {
+struct Node *createNode(int value)
+{
     struct Node *newnode = malloc(sizeof(struct Node));
-    if(newnode == NULL) exit(EXIT_FAILURE);
+    if(newnode == NULL)
+		exit(EXIT_FAILURE);
+
     newnode->key = value;
     newnode->next = NULL;
     return newnode;
 }
 
-int insert(int value, struct Node **head){
+int insert(int value, struct Node **head)
+{
 	// Cool Way to shorten this method.
 	// Use a pointer to a pointer so we can iterate through the list
 	// without changing the pointers directly.
 	while(*head != NULL && (*head)->key <= value){
-		if((*head)->key == value) return 0;
+		if((*head)->key == value)
+			return 0;
+
 		head = &((*head)->next);
 	}
 	
@@ -33,14 +39,14 @@ int insert(int value, struct Node **head){
 
 }
 
-int delete(int value, struct Node **head){
+int delete(int value, struct Node **head)
+{
 
-
-    while(*head != NULL && ((*head)->key) != value) {
+    while(*head != NULL && ((*head)->key) != value)
         head = &((*head)->next);
-    }
 
-    if(*head == NULL) return 0;
+    if(*head == NULL)
+		return 0;
 
     struct Node *tofree = *head;
     *head = (*head)->next;
@@ -49,15 +55,17 @@ int delete(int value, struct Node **head){
     return 1;
 }
 
-void printlist(struct Node *head){
+void printlist(struct Node *head)
+{
     struct Node *curr;
-    for(curr = head; curr != NULL; curr = curr->next){
+    for(curr = head; curr != NULL; curr = curr->next)
         printf(" %i", curr->key);
-    }
+
     printf("\n");
 }
 
-int main() {
+int main()
+{
     char op;
     int value, listlength;
     listlength = 0;

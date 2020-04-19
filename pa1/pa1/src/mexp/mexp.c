@@ -3,32 +3,37 @@
 
 void printmatrix(int **matrix, int size);
 
-int **createMatrix(int size){
+int **createMatrix(int size)
+{
 	int **newmatrix = malloc(size * sizeof(int*));
 	int i;
-	for(i = 0; i < size; i++){
+
+	for(i = 0; i < size; i++)
 		newmatrix[i] = malloc(size * sizeof(int));
-	}
+	
 	return newmatrix;
 }
 
-void freeMatrix(int ***matrix, int size){
+void freeMatrix(int ***matrix, int size)
+{
 	int i;
-	for(i = 0; i < size; i++){
+	for(i = 0; i < size; i++)
 		free((*matrix)[i]);
-	}
+
 }
 
-void setmatrix(int ***matrixA, int ***matrixB, int size){
+void setmatrix(int ***matrixA, int ***matrixB, int size)
+{
 	int i,j;
 	for(i = 0; i < size; i++){
-		for(j = 0; j < size; j++){
+		for(j = 0; j < size; j++)
 			(*matrixA)[i][j] = (*matrixB)[i][j];
-		}
+		
 	}
 }
 
-int matrixmulti(int **matrixA, int power, int size){
+int matrixmulti(int **matrixA, int power, int size)
+{
 	
 	int **product = createMatrix(size);
 	int **matrixB = createMatrix(size);
@@ -47,9 +52,9 @@ int matrixmulti(int **matrixA, int power, int size){
 	while( (power - 1) > 0){
 		for(row = 0; row < size; row++){
 			for(colplace = 0; colplace < size; colplace++){
-				for(col = 0; col < size; col++){
+				for(col = 0; col < size; col++)
 					result += matrixA[row][col] * matrixB[col][colplace];
-				}
+				
 				product[row][colplace] = result;
 				result = 0;
 			}
@@ -65,34 +70,37 @@ int matrixmulti(int **matrixA, int power, int size){
 	return 1;
 }
 
-void IMatrix(int size){
+void IMatrix(int size)
+{
 	int i,j;
 	for(i = 0; i < size; i++){
 		for(j = 0; j < size; j++){
-			if(i == j){
+			if(i == j)
 				printf("1 ");
-			} else {
+
+			else
 				printf("0 ");
-			}
 		}
 		printf("\n");
 	}
 }
 
-void printmatrix(int **matrix, int size){
+void printmatrix(int **matrix, int size)
+{
 	int i,j;
 	for(i = 0; i < size; i++){
 		for(j = 0; j < size; j++) {
 			printf("%i", matrix[i][j]);
 			//This line is to fix some annoying space thing with autograder
-			if((j+1 != size)) printf(" ");
-
+			if((j+1 != size))
+				printf(" ");
 		}
 		printf("\n");
 	}
 }
 
-void readMatrixFile(int ***matrix, int *size, int *power, char *filename){
+void readMatrixFile(int ***matrix, int *size, int *power, char *filename)
+{
 	FILE *fp;
 	int i, j;
 	fp = fopen(filename, "r");
@@ -121,20 +129,21 @@ void readMatrixFile(int ***matrix, int *size, int *power, char *filename){
 
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 
     int **matrix, size = 0, power = 0;
 
     readMatrixFile(&matrix, &size, &power, argv[1]);
 
-	if(power == 0){
+	if(power == 0)
 		IMatrix(size);
-	} else if(power < 0){
+
+	else if(power < 0)
 		return EXIT_FAILURE;
-	} else if(!matrixmulti(matrix, power, size)){
+
+	else if(!matrixmulti(matrix, power, size))
 		return EXIT_FAILURE;
-	}
 
     return 0;
-
 }
