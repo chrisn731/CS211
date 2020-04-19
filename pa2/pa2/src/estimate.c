@@ -38,21 +38,23 @@ struct Matrix {
 };
 
 /** Free a given Matrix. */
-void FreeMatrix(struct Matrix A) {
+void FreeMatrix(struct Matrix A)
+{
     int i;
-    for(i = 0; i < A.rows; ++i) {
+    for(i = 0; i < A.rows; ++i)
         free(A.data[i]);
-    }
+
     free(A.data);
 }
 
 /** Compare two strings against each other. */
-int StringCompare(char *word, char *against) {
+int StringCompare(char *word, char *against)
+{
     int i = 0;
     while(word[i] != '\0') {
-        if(word[i] != against[i]) {
+        if(word[i] != against[i])
             return 0;
-        }
+
         ++i;
     }
     return 1;
@@ -60,7 +62,8 @@ int StringCompare(char *word, char *against) {
 
 /** Create a matrix given rows and cols.
  *  In our case our rows and cols will be either number of houses or number of attributes. */
-struct Matrix CreateMatrix(int rows, int cols) {
+struct Matrix CreateMatrix(int rows, int cols)
+{
     struct Matrix new;
     new.cols = cols;
     new.rows = rows;
@@ -84,7 +87,8 @@ struct Matrix CreateMatrix(int rows, int cols) {
 }
 
 /** Opens the training data file to get the sizes needed for our matrix to house the data.*/
-void AssignMatrixSizes(FILE **trainingfile, int *attributes, int *numofhouses, struct Matrix *X, struct Matrix *Y) {
+void AssignMatrixSizes(FILE **trainingfile, int *attributes, int *numofhouses, struct Matrix *X, struct Matrix *Y)
+{
     if(fscanf(*trainingfile, "%i", attributes) == EOF){
         printf("error reading attributes\n");
         exit(EXIT_FAILURE);
@@ -101,7 +105,8 @@ void AssignMatrixSizes(FILE **trainingfile, int *attributes, int *numofhouses, s
 
 /** Sort the files given in the arguments. This is useful because if the files are given
  * in any order the program can still run and know which file to use. */
-char **sortFiles(char **file1, char **file2) {
+char **sortFiles(char **file1, char **file2)
+{
     char **files = malloc(2 * sizeof(char*));
     files[0] = *file1;
     files[1] = *file2;
@@ -123,7 +128,8 @@ char **sortFiles(char **file1, char **file2) {
 
         if(StringCompare("data", FileType)){
             inputread = 1;
-            if(i == 1) break;
+            if(i == 1)
+				break;
             files[0] = *file2;
             files[1] = *file1;
             i = -1;
@@ -131,7 +137,8 @@ char **sortFiles(char **file1, char **file2) {
 
         if(StringCompare("train", FileType)){
             trainread = 1;
-            if(i == 0) continue;
+            if(i == 0)
+				continue;
             files[0] = *file2;
             files[1] = *file1;
         }
@@ -147,35 +154,37 @@ char **sortFiles(char **file1, char **file2) {
 }
 
 /** Print a given Matrix to stdout with decimal points. */
-void PrintMatrix(struct Matrix Z) {
+void PrintMatrix(struct Matrix Z)
+{
     int i,j;
     for(i = 0; i < Z.rows; ++i) {
-        for(j = 0; j < Z.cols; ++j){
+        for(j = 0; j < Z.cols; ++j)
             printf("%lf\t", Z.data[i][j]);
-        }
+
         printf("\n");
     }
 }
 
 /** Print a given Matrix to stdout that has no decimal points. */
-void PrintMatrixNoDec(struct Matrix Z) {
+void PrintMatrixNoDec(struct Matrix Z)
+{
     int i,j;
     for(i = 0; i < Z.rows; ++i) {
-        for(j = 0; j < Z.cols; ++j){
+        for(j = 0; j < Z.cols; ++j)
             printf("%.0f\n", Z.data[i][j]);
-        }
     }
 }
 
 /** Transpose any given Matrix. In terms of our Algorithm it will always transpose 
  * Matrix X. */
-struct Matrix TransposeMatrix(struct Matrix X) {
+struct Matrix TransposeMatrix(struct Matrix X)
+{
     struct Matrix Trans = CreateMatrix(X.cols, X.rows);
     int i, j;
     for(i = 0; i < X.rows; ++i) {
-        for(j = 0; j < X.cols; ++j) {
+        for(j = 0; j < X.cols; ++j) 
             Trans.data[j][i] = X.data[i][j];
-        }
+        
     }
     return Trans;
 }
@@ -183,36 +192,37 @@ struct Matrix TransposeMatrix(struct Matrix X) {
 
 /** Fill up Matrix X with the training data & fill Matrix Y with our House Prices. By the end Matrix X
  * should also only have 1's in the first column.*/
-void PopulateMatricies(FILE **fp, int attributes, int numofhouses, struct Matrix *X, struct Matrix *Y){
+void PopulateMatricies(FILE **fp, int attributes, int numofhouses, struct Matrix *X, struct Matrix *Y)
+{
     int i, j;
     double value;
     for(i = 0; i < numofhouses; ++i) {
         // We are doing j < attr + 2 because the value of attributes passed in will be already one less
         // then the actual length of the file. So we increase by two so we can capture the last column.
         for(j = 0; j < (attributes + 2); ++j) {
-            if(j == 0){
+            if(j == 0)
                 X->data[i][j] = 1;
-            } else {
+            else {
                 fscanf(*fp, "%lf", &value);
-                if((j+1) == (attributes+2)){
+                if((j+1) == (attributes+2))
                     Y->data[i][0] = value;
-                } else {
+                else
                     X->data[i][j] = value;
-                }
             }
         }
     }
 }
 
 /** Full up a single Matrix with given data file. */
-void PopulateMatrix(FILE **fp, int attributes, int numofhouses, struct Matrix *X) {
+void PopulateMatrix(FILE **fp, int attributes, int numofhouses, struct Matrix *X)
+{
     int i, j;
     double value;
     for(i = 0; i < numofhouses; ++i) {
         for(j = 0; j < (attributes + 1); ++j) {
-            if(j == 0){
+            if(j == 0)
                 X->data[i][j] = 1;
-            } else {
+            else {
                 fscanf(*fp, "%lf", &value);
                 X->data[i][j] = value;
             }
@@ -221,19 +231,16 @@ void PopulateMatrix(FILE **fp, int attributes, int numofhouses, struct Matrix *X
 }
 
 /** This method is going to be our Gaussian Elimination Function. Godspeed. */
-struct Matrix InvertMatrix(struct Matrix Invert) {
+struct Matrix InvertMatrix(struct Matrix Invert)
+{
     // Identity Matrix for holding our resulting Invert Matrix 
     struct Matrix Iden = CreateMatrix(Invert.rows, Invert.cols);
     int i, j;
 
     for(i = 0; i < Iden.rows; ++i) {
-        for(j = 0; j < Iden.cols; ++j) {
-            if(i == j) {
-                Iden.data[i][j] = 1;
-            } else {
-                Iden.data[i][j] = 0;
-            }
-        }
+        for(j = 0; j < Iden.cols; ++j) 
+            Iden.data[i][j] = (i == j) ? 1 : 0;
+
     }
     // Begin Gaussian Elimination
 
@@ -286,7 +293,8 @@ struct Matrix InvertMatrix(struct Matrix Invert) {
 }
 
 /** Multiply any two Matricies together. Returns a new Result Matrix. */
-struct Matrix MultiplyMatrix(struct Matrix X, struct Matrix Y) {
+struct Matrix MultiplyMatrix(struct Matrix X, struct Matrix Y)
+{
     if(X.cols != Y.rows) {
         printf("Unable to Multiply Matricies!\n");
         exit(EXIT_FAILURE);
@@ -308,7 +316,8 @@ struct Matrix MultiplyMatrix(struct Matrix X, struct Matrix Y) {
     return product;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
     if(argc < 3){
         printf("error, not enough inputs\n");
         return 1;
