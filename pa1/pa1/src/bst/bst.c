@@ -108,7 +108,7 @@ int main()
             print(root);
             printf("\n");
         } 
-		else {
+	else {
 
             if(!scanf("%i", &value))
 				continue;
@@ -118,10 +118,10 @@ int main()
                 if(insert(&root, value)){
                     nodecount++;
                     printf("inserted\n");
-				}
-				else
+		}
+		else
                     printf("not inserted\n");
-			}
+	    }
 
             else if(op == 's')
                 search(&root, value);
@@ -131,9 +131,9 @@ int main()
                 if(delete(&root, value)){
                     nodecount--;
                     printf("deleted\n");
-				}
-				else 
-					printf("absent\n");
+		} 
+		else 
+			printf("absent\n");
             }
         }
     }
