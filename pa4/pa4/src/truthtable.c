@@ -105,7 +105,7 @@ void PrintTableVars(struct VarTable Table)
 	puts("End of Variable Dump");
 }
 
-/** Print the values of the variables in the table */
+/** Print the values of inputs & outputs of the table. */
 void PrintTableValues(struct VarTable Table)
 {
 	int i;
@@ -118,12 +118,14 @@ void PrintTableValues(struct VarTable Table)
 		if(i+1 == Table.OutputEnd) 
 			printf("%d",Table.Vars[i].value);
 		
-		else printf("%d ", Table.Vars[i].value);
+		else
+			printf("%d ", Table.Vars[i].value);
 		
 	}
 	printf("\n");
 }
 
+/** Print the values of inputs & outputs & temps of the table. */
 void PrintAllTableValues(struct VarTable Table)
 {
 	int i;
