@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// Allows us to simply assign a value to our gate (0-8) that will decide its behavior.
 typedef enum { PASS, NOT, AND, NAND, NOR, OR, XOR, DECODER, MULTIPLEXER } kind_t;
 
 // The master Variable table is made up of Variables. A single variable contains the variable name,
@@ -11,7 +12,8 @@ struct Variable {
 	int value;
 };
 
-// The master Variable Table. Will hold all our variables for our gate to refer to.
+// The master Variable Table. Will hold all our variables for our gate to refer to with indexes that hold
+// where our inputs, outputs, and temporary variables end.
 struct VarTable {
 	struct Variable	*Vars;
 	int	InputEnd;
@@ -24,7 +26,7 @@ struct VarTable {
  * **Inparam : Array that points to the variables in the master table that it relies on for input.
  * **outparam : Same as inparam but for output.
  * NumOfParam : Keeps track on how many variables it deals with. Mostly important for MUX and DEC.
- * type : 0-11 value that will allow us to quickly decifer what gate it is.
+ * type : 0-8 value that will allow us to quickly decifer what gate it is.
  */
 struct Gate {
 	int **inparam;
@@ -93,18 +95,6 @@ int Pow(int Base, int Exponent)
 	return total;
 }
 
-/** Print the Variable Table */
-void PrintTableVars(struct VarTable Table)
-{
-	int i;
-	puts("All found Varibales:");
-
-	for(i = 0; i < Table.TempEnd; ++i)
-		printf("%s\n", Table.Vars[i].VarName);
-
-	puts("End of Variable Dump");
-}
-
 /** Print the values of inputs & outputs of the table. */
 void PrintTableValues(struct VarTable Table)
 {
@@ -123,14 +113,6 @@ void PrintTableValues(struct VarTable Table)
 		
 	}
 	printf("\n");
-}
-
-void PrintGates(struct Gate *First)
-{
-	while(First != NULL){
-		printf("NumofIn: %d NumofOut: %d, type %d\n", First->NumOfIn, First->NumOfOut, First->type);
-		First = First->next;
-	}
 }
 
 // ====================================== End Of Utility Functions ====================================================
@@ -228,7 +210,7 @@ void Search_For_Temps(struct VarTable *Table, FILE *fp)
 	}
 }
 
-/** Create the Logic Gates using a Linked List Data Structure to link them together. */
+/** Create the Logic Gates and link them together in a linked list style. */
 void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *fp)
 {
 	struct Gate **Indirect = First;
@@ -241,7 +223,7 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 	fgets(SKIP, 16384, fp);
 
 	while(fscanf(fp, "%16s", BUFFER) != EOF) {
-		// Find what type of gate it is
+		// Find what type of gate it is and assign the type
 		switch(BUFFER[0]){
 			case 'D':
 				type = DECODER;
@@ -461,10 +443,8 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 void SortGates(struct Gate **First, struct VarTable Table)
 {
 	int i, found;
-	//struct Gate **start = First;
 	while(*First != NULL) {
 		found = 0;
-		//printf("Gate is of type: %d\n", (*First)->type);
 		// Iterate through all inputs of the gate and check for Multiplexer special case
 		int NumOfIn = ((*First)->type == 8) ? ((*First)->NumOfIn + Pow(2, (*First)->NumOfIn)) : (*First)->NumOfIn;
 
@@ -494,9 +474,7 @@ void SortGates(struct Gate **First, struct VarTable Table)
 						
 						// If found, swap the gates, else go to the next gate.
 						if(found){
-							//printf("Swap gate is of type %d\n", (*swap)->type);
 							// Swap the pointers...
-							//puts("Swapping pointers...");
 							struct Gate *temp = *First;
 							*First = *swap;
 							struct Gate *temp2 = (*swap)->next;
@@ -527,6 +505,7 @@ void SortGates(struct Gate **First, struct VarTable Table)
 		Table.Vars[i].value = 0;
 }
 
+/** Function to iterate our inputs. Every iteration calls DoCircuit. */
 void Solve_Truth_Table(struct Gate *First, struct VarTable Table)
 {
 	int i, start = (Table.InputEnd-1);
@@ -575,24 +554,18 @@ int main(int argc, char *argv[])
 	
 	struct VarTable Table;
 	ReadIOVars(&Table, &fp);
-	//puts("Read IO Vars");
 	
 	Search_For_Temps(&Table, fp);
-	//puts("Read all temps");
-	
-	//PrintTableVars(Table);
-	//PrintTableAddr(Table);
 	
 	struct Gate *First = malloc(sizeof(struct Gate));
 	int binary[] = {0 , 1, -1};
+
 	rewind(fp);
 	CreateGates(&First, Table, binary, fp);
 	fclose(fp);
-	//PrintGatesAddr(First);
-	//PrintTableValues(Table);
+
 	SortGates(&First, Table);
-	//puts("After Sorting...");
-	//PrintGatesAddr(First);
+
 	Solve_Truth_Table(First, Table);	
 
 	FreeTable(Table);
