@@ -215,12 +215,12 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 {
 	struct Gate **Indirect = First;
 	char BUFFER[17];
-	int temp;
 	kind_t type;
+	int inputs;
 	// Skip the first two lines of the file.
-	char SKIP[16384];
-	fgets(SKIP, 16384, fp);
-	fgets(SKIP, 16384, fp);
+	char SKIP[8192];
+	fgets(SKIP, 8192, fp);
+	fgets(SKIP, 8192, fp);
 
 	while(fscanf(fp, "%16s", BUFFER) != EOF) {
 		// Find what type of gate it is and assign the type
@@ -268,16 +268,14 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 		}
 		// A decoder and multiplexer requires a little more work to work out how many ins and outs it has.
 		else {
-			int inputs;
 			fscanf(fp, "%d", &inputs);
 			if(type == DECODER){
 				(*Indirect)->NumOfIn = inputs;
 				(*Indirect)->NumOfOut = Pow(2, inputs);
 			}
 			else {
-				(*Indirect)->NumOfIn = (inputs+ Pow(2,inputs));
+				(*Indirect)->NumOfIn = (inputs + Pow(2,inputs));
 				(*Indirect)->NumOfOut = 1;
-				temp = inputs;
 			}
 		}
 
@@ -333,11 +331,11 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 			}
 		}
 
-		// Just to make life simpler, I want the input # of the Multiplexer, not input total.
-		if(temp != 0){
-			(*Indirect)->NumOfIn = temp;
-			temp = 0;
-		}
+		// Just to make life simpler, I want the # of selectors of the Multiplexer, not total amount of inputs.
+		// Right now NumOfIn = inputs + Pow(2,inputs), so get rid of that power so NumOfIn - Pow = inputs.
+		if(type == MULTIPLEXER)
+			(*Indirect)->NumOfIn -= Pow(2,inputs);
+		
 
 		// Once finished, move on to the next directive.
 		Indirect = &((*Indirect)->next);
@@ -350,50 +348,44 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 	// Keep looping until we have no more gates.
 	while(First != NULL){
 		switch(First->type){
-			// PASS
-			case 0:
+
+			case PASS:
 				First->outparam[0][0] = First->inparam[0][0];
 				break;
 			
-			// NOT
-			case 1:
+			case NOT:
 				First->outparam[0][0] = (First->inparam[0][0] == 1) ? 0 : 1;
 				break;
 
-			// AND
-			case 2:
+			case AND:
 				if(First->inparam[0][0] == 1 && First->inparam[1][0] == 1)
 					First->outparam[0][0] = 1;
 				else
 					First->outparam[0][0] = 0;
 				break;
 
-			// NAND
-			case 3:
+			case NAND:
 				if(First->inparam[0][0] == 1 && First->inparam[1][0] == 1)
 					First->outparam[0][0] = 0;
 				else
 					First->outparam[0][0] = 1;
 				break;
 
-			// NOR
-			case 4:
+			case NOR:
 				if(First->inparam[0][0] == 1 || First->inparam[1][0] == 1)
 					First->outparam[0][0] = 0;
 				else
 					First->outparam[0][0] = 1;
 				break;
 
-			// OR
-			case 5:
+			case OR:
 				if(First->inparam[0][0] == 1 || First->inparam[1][0] == 1)
 					First->outparam[0][0] = 1;
 				else
 					First->outparam[0][0] = 0;
 				break;
 
-			// XOR
-			case 6:
+			case XOR:
 				if( (First->inparam[0][0] == 1 && First->inparam[1][0] == 0) || 
 					(First->inparam[0][0] == 0 && First->inparam[1][0] == 1))
 						First->outparam[0][0] = 1;
@@ -401,8 +393,7 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 					First->outparam[0][0] = 0;
 				break;
 
-			// DECODER
-			case 7:
+			case DECODER:
 			{
 				int i, incrementer = 1, bit = 0;
 				for(i = 0; i < First->NumOfIn; ++i){
@@ -417,8 +408,8 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 
 				break;
 			}	
-			// MULTIPLEXER
-			case 8:
+
+			case MULTIPLEXER:
 			{
 				int i, selectorindex = (Pow(2, First->NumOfIn));
 				int totalinputs = selectorindex + First->NumOfIn;
@@ -433,6 +424,7 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 				break;
 			}
 		}
+
 		// Go to the following gate.
 		First = First->next;
 	}
@@ -445,15 +437,17 @@ void SortGates(struct Gate **First, struct VarTable Table)
 	int i, found;
 	while(*First != NULL) {
 		found = 0;
-		// Iterate through all inputs of the gate and check for Multiplexer special case
+		// check for Multiplexer special case in which NumOfIn isn't simply the number attached to the gate.
 		int NumOfIn = ((*First)->type == 8) ? ((*First)->NumOfIn + Pow(2, (*First)->NumOfIn)) : (*First)->NumOfIn;
-
+		
+		// Iterate through all the inputs of the gate checking if they are temp vars.
 		for(i = 0; i < NumOfIn; ++i){
 			int *TempAddr = (*First)->inparam[i], j;
 			// Go through all the Temporary Variables
 			for(j = Table.OutputEnd; j < Table.TempEnd; ++j){
 				int *TableAddr = &(Table.Vars[j].value);
-				if(TempAddr == TableAddr && Table.Vars[j].value == 0){
+				// If the pointers match, this must mean the input is a temporary variable.
+				if(TempAddr == TableAddr){
 
 					//Flag the temp Variable
 					Table.Vars[j].value = 1;
@@ -464,7 +458,9 @@ void SortGates(struct Gate **First, struct VarTable Table)
 					while(*swap != NULL){
 						int k;
 						
-						// Check if the current gate holds that flagged variable.
+						// Check if the current gate holds that flagged variable. If the gate does have that variable
+						// in it's output, that must mean our "current" gate uses it as an input before "swap" assigns
+						// it a value. Therefore flag it, and prepare to swap it.
 						for(k = 0; k < ((*swap)->NumOfOut); ++k){
 							if((*swap)->outparam[k][0] == 1){
 								found = 1;
@@ -474,7 +470,6 @@ void SortGates(struct Gate **First, struct VarTable Table)
 						
 						// If found, swap the gates, else go to the next gate.
 						if(found){
-							// Swap the pointers...
 							struct Gate *temp = *First;
 							*First = *swap;
 							struct Gate *temp2 = (*swap)->next;
@@ -485,7 +480,7 @@ void SortGates(struct Gate **First, struct VarTable Table)
 						else
 							swap = &((*swap)->next);
 					}
-					// Set the varibale back to 0
+					// Set the flagged variable back to 0.
 					Table.Vars[j].value = 0;
 				}
 				// If we did do a swap, we are going to want to restart the process on the swapped gate.
