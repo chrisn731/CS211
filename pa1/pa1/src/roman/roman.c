@@ -10,7 +10,8 @@ void convert(int numtoconvert)
 	if(numtoconvert >= 1000) {
 		Mcount = numtoconvert / 1000;
 		numtoconvert -= (Mcount * 1000);
-		for(i=0; i < Mcount; i++) printf("M");	
+		for(i=0; i < Mcount; i++)
+			printf("M");	
 	}
 
 	if(numtoconvert >= 500) {
@@ -18,10 +19,12 @@ void convert(int numtoconvert)
 			CMcount = 1;
 			numtoconvert -= 900;
 			printf("CM");
-		} else {
+		}
+		else {
 			Dcount = numtoconvert / 500;
 			numtoconvert -= (Dcount * 500);
-			for(i = 0; i < Dcount; i++) printf("D");
+			for(i = 0; i < Dcount; i++)
+				printf("D");
 		}
 	}
 	
@@ -30,10 +33,12 @@ void convert(int numtoconvert)
 			CDcount = 1;
 			numtoconvert -= 400;
 			printf("CD");
-		} else { 
+		}
+		else { 
 			Ccount = numtoconvert / 100;
 			numtoconvert -= (Ccount * 100);
-			for(i = 0; i < Ccount; i++) printf("C");
+			for(i = 0; i < Ccount; i++)
+				printf("C");
 		}
 	}
 
@@ -42,10 +47,12 @@ void convert(int numtoconvert)
 			XCcount = 1;
 			numtoconvert -= 90;
 			printf("XC");
-		} else {
+		}
+		else {
 			Lcount = numtoconvert / 50;
 			numtoconvert -= (Lcount * 50);
-			for(i = 0; i < Lcount; i++) printf("L");
+			for(i = 0; i < Lcount; i++)
+				printf("L");
 		}
 	}
 	
@@ -54,10 +61,12 @@ void convert(int numtoconvert)
 			XLcount = 1;
 			numtoconvert -= 40;
 			printf("XL");
-		} else {
+		}
+		else {
 			Xcount = numtoconvert / 10;
 			numtoconvert -= (Xcount * 10);
-			for(i = 0; i < Xcount; i++) printf("X");
+			for(i = 0; i < Xcount; i++)
+				printf("X");
 		}
 	}
 	
@@ -66,10 +75,12 @@ void convert(int numtoconvert)
 			IXcount = 1;
 			numtoconvert -= 9;
 			printf("IX");
-		} else { 
+		}
+		else { 
 			Vcount = numtoconvert / 5;
 			numtoconvert -= (Vcount * 5);
-			for(i = 0; i < Vcount; i++) printf("V");
+			for(i = 0; i < Vcount; i++)
+				printf("V");
 		}
 	}
 
@@ -78,17 +89,20 @@ void convert(int numtoconvert)
 			IVcount = 1;
 			numtoconvert -= 4;		
 			printf("IV");
-		} else {
+		}
+		else {
 			Icount = numtoconvert / 1;
 			numtoconvert -= (Icount);
-			for(i = 0; i < Icount; i++) printf("I");
+			for(i = 0; i < Icount; i++)
+				printf("I");
 		}
 	}
 	printf("\n");
 }
 
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv)
+{
 	if(argc == 0) 
 		return 1;
 	
