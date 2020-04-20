@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int compresslength(char* input) {
+int compresslength(char* input)
+{
 
 	char letter = input[0];
 	int inputsize = 0;
@@ -17,18 +18,23 @@ int compresslength(char* input) {
 			length += 2 + (lettercount / 10);
 			lettercount = 1;
 			letter = input[i];
-		} else {
+		}
+		else {
 			i++;
 			lettercount++;
 			inputsize++;
 		}
 	}
-	if(length > inputsize) return 0;
+
+	if(length > inputsize)
+		return 0;
+
 	return length;
 }
 
 
-int compress(char *input) {
+int compress(char *input)
+{
 	
 	char currletter = input[0];
 	char scanletter = input[0];
@@ -40,7 +46,8 @@ int compress(char *input) {
 			printf("%c%i",currletter,charcounter);
 			currletter = scanletter;
 			charcounter = 0;	
-		} else {
+		}
+		else {
 			inindex++;
 			charcounter++;
 			scanletter = input[inindex];
@@ -54,8 +61,9 @@ int compress(char *input) {
 
 
 
-int main(int argc, char** argv) {
-	if(argc == 1 || argc > 2) return 1;
+int main(int argc, char** argv)
+{
+	if(argc != 2) return 1;
 
 	char* input = argv[1];
 	int length = compresslength(input);
@@ -63,10 +71,12 @@ int main(int argc, char** argv) {
 	if(length == -1) {
 		puts("error");
 		return 0;
-	} else if (length == 0) {
+	}
+	else if (length == 0) {
 		puts(input);
 		return 0;
-	} else {
+	}
+	else {
 		compress(input);
 		return 0;
 	}
