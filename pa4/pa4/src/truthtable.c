@@ -336,7 +336,6 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 		if(type == MULTIPLEXER)
 			(*Indirect)->NumOfIn -= Pow(2,inputs);
 		
-
 		// Once finished, move on to the next directive.
 		Indirect = &((*Indirect)->next);
 	}
