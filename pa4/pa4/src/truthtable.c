@@ -78,6 +78,8 @@ void FreeGates(struct Gate *List)
 	while(List != NULL){
 		temp = List;
 		List = List->next;
+		free(temp->inparam);
+		free(temp->outparam);
 		free(temp);
 	}
 }
@@ -163,6 +165,7 @@ void Search_For_Temps(struct VarTable *Table, FILE *fp)
 	char BUFFER[17];
 	int NumOfIn, NumOfOut;
 	Table->TempEnd = Table->OutputEnd;
+
 	while(fscanf(fp, "%16s", BUFFER) != EOF) {
 		// Check if its a 'NOT' or 'PASS' Gate
 		if( (BUFFER[0] == 'N' && BUFFER[2] == 'T') || (BUFFER[0] == 'P')) {
@@ -423,7 +426,6 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 				break;
 			}
 		}
-
 		// Go to the following gate.
 		First = First->next;
 	}
@@ -433,11 +435,12 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 
 void SortGates(struct Gate **First, struct VarTable Table)
 {
-	int i, found;
+	int i, found, NumOfIn;
+
 	while(*First != NULL) {
 		found = 0;
 		// check for Multiplexer special case in which NumOfIn isn't simply the number attached to the gate.
-		int NumOfIn = ((*First)->type == 8) ? ((*First)->NumOfIn + Pow(2, (*First)->NumOfIn)) : (*First)->NumOfIn;
+		NumOfIn = ((*First)->type == 8) ? ((*First)->NumOfIn + Pow(2, (*First)->NumOfIn)) : (*First)->NumOfIn;
 		
 		// Iterate through all the inputs of the gate checking if they are temp vars.
 		for(i = 0; i < NumOfIn; ++i){
@@ -481,22 +484,20 @@ void SortGates(struct Gate **First, struct VarTable Table)
 					}
 					// Set the flagged variable back to 0.
 					Table.Vars[j].value = 0;
+					
+					// If we did do a swap, we are going to want to restart the process on the swapped gate.
+					// We do this by setting loop conditions to false using the variables.
+					if(found){
+						j = Table.TempEnd;
+						i = NumOfIn;
+					}
 				}
-				// If we did do a swap, we are going to want to restart the process on the swapped gate.
-				if(found)
-					break;
 			}
-			// If we did do a swap, we are going to want to restart the process on the swapped gate.
-			if(found)
-				break;
 		}
 		// Only procced to the next gate if we didn't swap.
 		if(!found)
 			First = &((*First)->next);
 	}
-	// Reset values of the Table
-	for(i = 0; i < Table.TempEnd; ++i)
-		Table.Vars[i].value = 0;
 }
 
 /** Function to iterate our inputs. Every iteration calls DoCircuit. */
