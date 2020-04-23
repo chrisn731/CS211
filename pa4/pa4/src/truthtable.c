@@ -126,8 +126,9 @@ void ReadIOVars(struct VarTable *Table, FILE **fp)
 {
 	// Scan the 'INPUT' string and the number of input variables
 	char IOBUF[7];
-	fscanf(*fp, "%s", IOBUF);
 	int i, NumOfInputs, NumOfOutputs;
+
+	fscanf(*fp, "%s", IOBUF);
 	fscanf(*fp, "%d", &NumOfInputs);
 	
 	Table->InputEnd = NumOfInputs;
@@ -217,23 +218,26 @@ void Search_For_Temps(struct VarTable *Table, FILE *fp)
 void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *fp)
 {
 	struct Gate **Indirect = First;
-	char BUFFER[17];
+	char BUFFER[17], SKIP[8192];
 	kind_t type;
 	int inputs;
+
 	// Skip the first two lines of the file.
-	char SKIP[8192];
 	fgets(SKIP, 8192, fp);
 	fgets(SKIP, 8192, fp);
 
 	while(fscanf(fp, "%16s", BUFFER) != EOF) {
 		// Find what type of gate it is and assign the type
 		switch(BUFFER[0]){
+
 			case 'D':
 				type = DECODER;
 				break;
+
 			case 'M':
 				type = MULTIPLEXER;
 				break;
+
 			case 'N':
 				if(BUFFER[2] == 'T')
 					type = NOT;
@@ -242,15 +246,19 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 				else
 					type = NOR;
 				break;
+
 			case 'P':
 				type = PASS;
 				break;
+
 			case 'O':
 				type = OR;
 				break;
+
 			case 'A':
 				type = AND;
 				break;
+
 			case 'X':
 				type = XOR;
 				break;
