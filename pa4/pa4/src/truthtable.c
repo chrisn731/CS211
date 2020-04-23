@@ -220,7 +220,7 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 	struct Gate **Indirect = First;
 	char BUFFER[17], SKIP[8192];
 	kind_t type;
-	int inputs;
+	int inputs, i, j;
 
 	// Skip the first two lines of the file.
 	fgets(SKIP, 8192, fp);
@@ -293,7 +293,7 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 		// Begin allocating space for our input parameters. The array will be int pointers so that we can refer to the
 		// master variable table and quickly pull what value is currently stored there.
 		(*Indirect)->inparam = malloc(sizeof(int*) * ((*Indirect)->NumOfIn));
-		int i, j;
+
 		// Scan through the file and store those variables
 		for(i = 0; i < (*Indirect)->NumOfIn; ++i){
 			fscanf(fp, "%16s", BUFFER);
@@ -443,7 +443,8 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 
 void SortGates(struct Gate **First, struct VarTable Table)
 {
-	int i, found, NumOfIn;
+	int i, j, found, NumOfIn;
+	int *TempAddr, *TableAddr;
 
 	while(*First != NULL) {
 		found = 0;
@@ -452,10 +453,10 @@ void SortGates(struct Gate **First, struct VarTable Table)
 		
 		// Iterate through all the inputs of the gate checking if they are temp vars.
 		for(i = 0; i < NumOfIn; ++i){
-			int *TempAddr = (*First)->inparam[i], j;
+			TempAddr = (*First)->inparam[i];
 			// Go through all the Temporary Variables
 			for(j = Table.OutputEnd; j < Table.TempEnd; ++j){
-				int *TableAddr = &(Table.Vars[j].value);
+				TableAddr = &(Table.Vars[j].value);
 				// If the pointers match, this must mean the input is a temporary variable.
 				if(TempAddr == TableAddr){
 
@@ -554,23 +555,34 @@ int main(int argc, char *argv[])
 		printf("error opening file");
 		return 1;
 	}
-	
+
+	// Initalize the Master Variable Table.
 	struct VarTable Table;
+
+	// Read in the Input/Output Variables and add them to the table.
 	ReadIOVars(&Table, &fp);
 	
+	// Get all the temporary variables and add them to the table.
 	Search_For_Temps(&Table, fp);
 	
-	struct Gate *First = malloc(sizeof(struct Gate));
+	// Create the "First" gate and the constants values array
+	struct Gate *First = NULL;
 	int binary[] = {0 , 1, -1};
 
 	rewind(fp);
+
+	// Go through the file and start making the gates based on directives.
 	CreateGates(&First, Table, binary, fp);
 	fclose(fp);
 
+	// Go through the gates and make sure they are in the right order.
+	// (A temporary variable isn't being used before it is assigned a value.)
 	SortGates(&First, Table);
 
+	// Solve the circuit...
 	Solve_Truth_Table(First, Table);	
 
+	// ... free memory, and gracefully finish.
 	FreeTable(Table);
 	FreeGates(First);
 	return 0;
