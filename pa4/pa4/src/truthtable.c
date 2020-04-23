@@ -406,6 +406,7 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 			case DECODER:
 			{
 				int i, incrementer = 1, bit = 0;
+
 				for(i = 0; i < First->NumOfIn; ++i){
 					if(First->inparam[i][0] == 1)
 						bit += Pow(2, First->NumOfIn - incrementer);
@@ -424,6 +425,7 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 				int i, selectorindex = (Pow(2, First->NumOfIn));
 				int totalinputs = selectorindex + First->NumOfIn;
 				int row = 0, incrementer = 1;
+
 				for(i = selectorindex; i < totalinputs; ++i){
 					if(First->inparam[i][0] == 1)
 						row += Pow(2, First->NumOfIn - incrementer);
