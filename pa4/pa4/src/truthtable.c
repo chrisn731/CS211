@@ -124,10 +124,10 @@ void PrintTableValues(struct VarTable Table)
 /** Read the first two lines of the input file, getting all the basic Input/Output Variables adding them to the Table. */
 void ReadIOVars(struct VarTable *Table, FILE **fp)
 {
-	// Scan the 'INPUT' string
+	// Scan the 'INPUT' string and the number of input variables
 	char IOBUF[7];
 	fscanf(*fp, "%s", IOBUF);
-	int i, NumOfInputs;
+	int i, NumOfInputs, NumOfOutputs;
 	fscanf(*fp, "%d", &NumOfInputs);
 	
 	Table->InputEnd = NumOfInputs;
@@ -141,13 +141,13 @@ void ReadIOVars(struct VarTable *Table, FILE **fp)
 		Table->Vars[i].value = 0;
 	}
 
-	// Scan the 'OUTPUT' string and reuse the NumOfInputs variable for the NumOfOutputs
+	// Scan the 'OUTPUT' string and scan how many total output variables there are 
 	fscanf(*fp, "%s", IOBUF);
-	fscanf(*fp, "%d", &NumOfInputs);
+	fscanf(*fp, "%d", &NumOfOutputs);
 
 	// Allocate more space for the output variables
-	Table->Vars = realloc(Table->Vars, sizeof(struct Variable) * (NumOfInputs + Table->InputEnd));
-	Table->OutputEnd = NumOfInputs + Table->InputEnd;
+	Table->Vars = realloc(Table->Vars, sizeof(struct Variable) * (NumOfOutputs + Table->InputEnd));
+	Table->OutputEnd = NumOfOutputs + Table->InputEnd;
 
 	// Read the Output Vars and store them in the Variable struct
 	for(; i < Table->OutputEnd; ++i) {
