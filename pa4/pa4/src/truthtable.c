@@ -119,8 +119,6 @@ void PrintTableValues(struct VarTable Table)
 
 // ====================================== End Of Utility Functions ====================================================
 
-// ======================================= Start of Main Functions ====================================================
-
 /** Read the first two lines of the input file, getting all the basic Input/Output Variables adding them to the Table. */
 void ReadIOVars(struct VarTable *Table, FILE **fp)
 {
@@ -542,8 +540,6 @@ void Solve_Truth_Table(struct Gate *First, struct VarTable Table)
 		}
 	}
 }
-
-// ====================================== End Of Main Functions ====================================================
 
 int main(int argc, char *argv[])
 {
