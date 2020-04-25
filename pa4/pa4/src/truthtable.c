@@ -120,14 +120,14 @@ void PrintTableValues(struct VarTable Table)
 // ====================================== End Of Utility Functions ====================================================
 
 /** Read the first two lines of the input file, getting all the basic Input/Output Variables adding them to the Table. */
-void ReadIOVars(struct VarTable *Table, FILE **fp)
+void ReadIOVars(struct VarTable *Table, FILE *fp)
 {
 	// Scan the 'INPUT' string and the number of input variables
 	char IOBUF[7];
 	int i, NumOfInputs, NumOfOutputs;
 
-	fscanf(*fp, "%s", IOBUF);
-	fscanf(*fp, "%d", &NumOfInputs);
+	fscanf(fp, "%s", IOBUF);
+	fscanf(fp, "%d", &NumOfInputs);
 	
 	Table->InputEnd = NumOfInputs;
 	Table->Vars = malloc(sizeof(struct Variable) * NumOfInputs);
@@ -135,14 +135,14 @@ void ReadIOVars(struct VarTable *Table, FILE **fp)
 	// Read the Input Vars and store them in the Variable struct
 	for(i = 0; i < NumOfInputs; ++i) {
 		Table->Vars[i].VarName = malloc(sizeof(char) * 17);
-		fscanf(*fp, "%16s", Table->Vars[i].VarName);
+		fscanf(fp, "%16s", Table->Vars[i].VarName);
 		Table->Vars[i].index = i;
 		Table->Vars[i].value = 0;
 	}
 
 	// Scan the 'OUTPUT' string and scan how many total output variables there are 
-	fscanf(*fp, "%s", IOBUF);
-	fscanf(*fp, "%d", &NumOfOutputs);
+	fscanf(fp, "%s", IOBUF);
+	fscanf(fp, "%d", &NumOfOutputs);
 
 	// Allocate more space for the output variables
 	Table->Vars = realloc(Table->Vars, sizeof(struct Variable) * (NumOfOutputs + Table->InputEnd));
@@ -151,7 +151,7 @@ void ReadIOVars(struct VarTable *Table, FILE **fp)
 	// Read the Output Vars and store them in the Variable struct
 	for(; i < Table->OutputEnd; ++i) {
 		Table->Vars[i].VarName = malloc(sizeof(char) * 17);
-		fscanf(*fp, "%16s", Table->Vars[i].VarName);
+		fscanf(fp, "%16s", Table->Vars[i].VarName);
 		Table->Vars[i].index = i;
 		Table->Vars[i].value = 0;
 	}
@@ -354,11 +354,14 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 void DoCircuit(struct Gate *First, struct VarTable Table)
 {
 	// Keep looping until we have no more gates.
+	// If the output param holds a value of -1, discard the output.
 	while(First != NULL){
 		switch(First->type){
 
 			case PASS:
-				First->outparam[0][0] = First->inparam[0][0];
+				if(!(First->outparam[0][0] == -1))
+					First->outparam[0][0] = First->inparam[0][0];
+
 				break;
 			
 			case NOT:
@@ -369,28 +372,36 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 				if(First->inparam[0][0] == 1 && First->inparam[1][0] == 1)
 					First->outparam[0][0] = 1;
 				else
-					First->outparam[0][0] = 0;
+					if(!(First->outparam[0][0] == -1))
+						First->outparam[0][0] = 0;
+
 				break;
 
 			case NAND:
 				if(First->inparam[0][0] == 1 && First->inparam[1][0] == 1)
 					First->outparam[0][0] = 0;
 				else
-					First->outparam[0][0] = 1;
+					if(!(First->outparam[0][0] == -1))
+						First->outparam[0][0] = 1;
+
 				break;
 
 			case NOR:
 				if(First->inparam[0][0] == 1 || First->inparam[1][0] == 1)
 					First->outparam[0][0] = 0;
 				else
-					First->outparam[0][0] = 1;
+					if(!(First->outparam[0][0] == -1))
+						First->outparam[0][0] = 1;
+
 				break;
 
 			case OR:
 				if(First->inparam[0][0] == 1 || First->inparam[1][0] == 1)
 					First->outparam[0][0] = 1;
 				else
-					First->outparam[0][0] = 0;
+					if(!(First->outparam[0][0] == -1))
+						First->outparam[0][0] = 0;
+
 				break;
 
 			case XOR:
@@ -398,7 +409,9 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 					(First->inparam[0][0] == 0 && First->inparam[1][0] == 1))
 						First->outparam[0][0] = 1;
 				else
-					First->outparam[0][0] = 0;
+					if(!(First->outparam[0][0] == -1))
+						First->outparam[0][0] = 0;
+
 				break;
 
 			case DECODER:
@@ -411,7 +424,7 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 
 					++incrementer;
 				}
-				// Discard our answer if that position holds a -1 representing a '_'
+
 				if(!(First->outparam[bit][0] == -1))
 					First->outparam[bit][0] = 1;
 
@@ -430,7 +443,10 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 
 					++incrementer;
 				}
-				First->outparam[0][0] = First->inparam[row][0];
+
+				if(!(First->outparam[0][0] == -1))
+					First->outparam[0][0] = First->inparam[row][0];
+
 				break;
 			}
 		}
@@ -454,9 +470,11 @@ void SortGates(struct Gate **First, struct VarTable Table)
 		// Iterate through all the inputs of the gate checking if they are temp vars.
 		for(i = 0; i < NumOfIn; ++i){
 			TempAddr = (*First)->inparam[i];
+
 			// Go through all the Temporary Variables
 			for(j = Table.OutputEnd; j < Table.TempEnd; ++j){
 				TableAddr = &(Table.Vars[j].value);
+				
 				// If the pointers match, this must mean the input is a temporary variable.
 				if(TempAddr == TableAddr){
 
@@ -558,7 +576,7 @@ int main(int argc, char *argv[])
 	struct VarTable Table;
 
 	// Read in the Input/Output Variables and add them to the table.
-	ReadIOVars(&Table, &fp);
+	ReadIOVars(&Table, fp);
 	
 	// Get all the temporary variables and add them to the table.
 	Search_For_Temps(&Table, fp);
