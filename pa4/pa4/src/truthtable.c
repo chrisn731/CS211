@@ -7,9 +7,9 @@ typedef enum { PASS, NOT, AND, NAND, NOR, OR, XOR, DECODER, MULTIPLEXER } kind_t
 // The master Variable table is made up of Variables. A single variable contains the variable name,
 // the index of it in the current Table, and the value it is currently holding.
 struct Variable {
-	char *VarName;
-	int index;
 	int value;
+	int index;
+	char *VarName;
 };
 
 // The master Variable Table. Will hold all our variables for our gate to refer to with indexes that hold
