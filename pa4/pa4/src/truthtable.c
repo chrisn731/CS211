@@ -1,19 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// Allows us to simply assign a value to our gate (0-8) that will decide its behavior.
+/* Allows us to simply assign a value to our gate (0-8) that will decide its behavior. */
 typedef enum { PASS, NOT, AND, NAND, NOR, OR, XOR, DECODER, MULTIPLEXER } kind_t;
 
-// The master Variable table is made up of Variables. A single variable contains the variable name,
-// the index of it in the current Table, and the value it is currently holding.
+/* 
+ * The master Variable table is made up of Variables. A single variable contains the variable name,
+ * the index of it in the current Table, and the value it is currently holding.
+ */
 struct Variable {
 	int value;
 	int index;
 	char *VarName;
 };
 
-// The master Variable Table. Will hold all our variables for our gate to refer to with indexes that hold
-// where our inputs, outputs, and temporary variables end.
+/* 
+ * The master Variable Table. Will hold all our variables for our gate to refer to with indexes that hold
+ * where our inputs, outputs, and temporary variables end.
+ */
 struct VarTable {
 	struct Variable	*Vars;
 	int	InputEnd;
@@ -21,7 +25,8 @@ struct VarTable {
 	int	TempEnd;
 };
 
-/** Gates of the ciruit.
+/*
+ * Gates of the ciruit.
  * Next : Holds the location of the Gate to be completed next.
  * **Inparam : Array that points to the variables in the master table that it relies on for input.
  * **outparam : Same as inparam but for output.
@@ -39,7 +44,7 @@ struct Gate {
 
 // ====================================== Utility Functions ====================================================
 
-/** String Compare Method */
+/* String Compare Method */
 int StrComp(char *p1, char *p2)
 {
 	char c1, c2;
@@ -53,7 +58,7 @@ int StrComp(char *p1, char *p2)
 	return c1 - c2;
 }
 
-/** String Copy */
+/* String Copy */
 void StrCopy(char *src, char *dest)
 {
 	char c1;
@@ -84,7 +89,7 @@ void FreeGates(struct Gate *List)
 	}
 }
 
-/** Math Power Function. Base ^ Exponent */
+/* Math Power Function. Base ^ Exponent */
 int Pow(int Base, int Exponent)
 {
 	if (Exponent == 0)
@@ -97,7 +102,7 @@ int Pow(int Base, int Exponent)
 	return total;
 }
 
-/** Print the values of inputs & outputs of the table. */
+/* Print the values of inputs & outputs of the table. */
 void PrintTableValues(struct VarTable Table)
 {
 	int i;
@@ -119,7 +124,7 @@ void PrintTableValues(struct VarTable Table)
 
 // ====================================== End Of Utility Functions ====================================================
 
-/** Read the first two lines of the input file, getting all the basic Input/Output Variables adding them to the Table. */
+/* Read the first two lines of the input file, getting all the basic Input/Output Variables adding them to the Table. */
 void ReadIOVars(struct VarTable *Table, FILE *fp)
 {
 	// Scan the 'INPUT' string and the number of input variables
@@ -157,8 +162,10 @@ void ReadIOVars(struct VarTable *Table, FILE *fp)
 	}
 }
 
-/** Continue from where I/O Vars left off. Searching through the directives to find any temporary variables appending
- * them to the Variable Table. */
+/* 
+ * Continue from where I/O Vars left off. 
+ * Searching through the directives to find any temporary variables appending them to the Variable Table.
+ */
 void Search_For_Temps(struct VarTable *Table, FILE *fp)
 {
 	char BUFFER[17];
@@ -189,8 +196,10 @@ void Search_For_Temps(struct VarTable *Table, FILE *fp)
 			NumOfOut = 1;
 		}
 		
-		// Go through our current Variables and see if we already have that Variable.
-		// If not, append it to our table.
+		/*
+		 * Go through our current Variables and see if we already have that Variable.
+		 * If not, append it to our table.
+		 */
 		int i, j;
 		for (i = 0; i < (NumOfIn + NumOfOut); ++i) {
 			fscanf(fp, "%16s", BUFFER);
@@ -212,7 +221,7 @@ void Search_For_Temps(struct VarTable *Table, FILE *fp)
 	}
 }
 
-/** Create the Logic Gates and link them together in a linked list style. */
+/* Create the Logic Gates and link them together in a linked list style. */
 void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *fp)
 {
 	struct Gate **Indirect = First;
@@ -288,15 +297,20 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 			}
 		}
 
-		// Begin allocating space for our input parameters. The array will be int pointers so that we can refer to the
-		// master variable table and quickly pull what value is currently stored there.
+		/*
+		 * Begin allocating space for our input parameters. The array will be int pointers so that we can refer to the
+		 * master variable table and quickly pull what value is currently stored there.
+		 */
 		(*Indirect)->inparam = malloc(sizeof(int*) * ((*Indirect)->NumOfIn));
 
 		// Scan through the file and store those variables
 		for (i = 0; i < (*Indirect)->NumOfIn; ++i) {
 			fscanf(fp, "%16s", BUFFER);
-			// If it is a '0' , '1' , or '_' then point to the special case "binary" array. This array contains 0, 1,
-			// and -1 for their respective symbols.
+
+			/*
+			 * If it is a '0' , '1' , or '_' then point to the special case "binary" array. This array contains 0, 1,
+			 * and -1 for their respective symbols.
+			 */
 			if (BUFFER[0] == '0')
 				(*Indirect)->inparam[i] = &(binary[0]);
 
@@ -341,8 +355,10 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 			}
 		}
 
-		// Just to make life simpler, I want the # of selectors of the Multiplexer, not total amount of inputs.
-		// Right now NumOfIn = inputs + Pow(2,inputs), so get rid of that power so NumOfIn - Pow = inputs.
+		/* 
+		 * Just to make life simpler, I want the # of selectors of the Multiplexer, not total amount of inputs. 
+		 * Right now NumOfIn = inputs + Pow(2,inputs), so get rid of that power so NumOfIn - Pow = inputs.
+		 */
 		if (type == MULTIPLEXER)
 			(*Indirect)->NumOfIn -= Pow(2,inputs);
 		
@@ -351,11 +367,13 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 	}
 }
 
-/** This function runs through the gates and attempts to solve for the truthtable. */
+/* This function runs through the gates and attempts to solve for the truthtable. */
 void DoCircuit(struct Gate *First, struct VarTable Table)
 {
-	// Keep looping until we have no more gates.
-	// If the output param holds a value of -1, discard the output.
+	/*
+	 * Keep looping until we have no more gates.
+	 * If the output param holds a value of -1, discard the output.
+	 */
 	while (First != NULL) {
 		switch (First->type) {
 
@@ -485,14 +503,18 @@ void SortGates(struct Gate **First, struct VarTable Table)
 					Table.Vars[j].value = 1;
 					struct Gate **swap = &((*First)->next);
 					
-					// Go through the remaining gates and swap with the gate if the gate contains the flagged temporary 
-					// variable in its output.
+					/*
+					 * Go through the remaining gates and swap with the gate if the gate contains the flagged temporary 
+					 * variable in its output.
+					 */
 					while (*swap != NULL) {
 						int k;
 						
-						// Check if the current gate holds that flagged variable. If the gate does have that variable
-						// in it's output, that must mean our "current" gate uses it as an input before "swap" assigns
-						// it a value. Therefore flag it, and prepare to swap it.
+						/*
+						 * Check if the current gate holds that flagged variable. If the gate does have that variable
+						 * in it's output, that must mean our "current" gate uses it as an input before "swap" assigns
+						 * it a value. Therefore flag it, and prepare to swap it.
+						 */
 						for (k = 0; k < ((*swap)->NumOfOut); ++k) {
 							if ((*swap)->outparam[k][0] == 1) {
 								found = 1;
@@ -515,8 +537,10 @@ void SortGates(struct Gate **First, struct VarTable Table)
 					// Set the flagged variable back to 0.
 					Table.Vars[j].value = 0;
 					
-					// If we did do a swap, we are going to want to restart the process on the swapped gate.
-					// We do this by setting loop conditions to false using the variables.
+					/* 
+					 * If we did do a swap, we are going to want to restart the process on the swapped gate.
+					 * We do this by setting loop conditions to false using the variables.
+					 */
 					if (found) {
 						j = Table.TempEnd;
 						i = NumOfIn;
@@ -530,15 +554,17 @@ void SortGates(struct Gate **First, struct VarTable Table)
 	}
 }
 
-/** Function to iterate our inputs. Every iteration calls DoCircuit. */
+/* Function to iterate our inputs. Every iteration calls DoCircuit. */
 void Solve_Truth_Table(struct Gate *First, struct VarTable Table)
 {
 	int i, start = (Table.InputEnd-1);
 	// Do the case where all Inputs are 0
 	DoCircuit(First, Table);
 
-	// Then enter the loop where we start putting 1s for inputs while working from right to left.
-	// So if we had x, y, z as inputs, z would become 1 and then y and then x.
+	/*
+	 * Then enter the loop where we start putting 1s for inputs while working from right to left.
+	 * So if we had x, y, z as inputs, z would become 1 and then y and then x.
+	 */
 	for (i = start; i >= 0; --i) {
 		
 		// If the current variable is a 0, flip it to 1 and reset back to the first var.
@@ -594,8 +620,10 @@ int main(int argc, char *argv[])
 	CreateGates(&First, Table, binary, fp);
 	fclose(fp);
 
-	// Go through the gates and make sure they are in the right order.
-	// (A temporary variable isn't being used before it is assigned a value.)
+	/*
+	 * Go through the gates and make sure they are in the right order.
+	 * (A temporary variable isn't being used before it is assigned a value.)
+	 */
 	SortGates(&First, Table);
 
 	// Solve the circuit...
