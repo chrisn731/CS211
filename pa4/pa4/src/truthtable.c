@@ -333,7 +333,7 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 			else {
 				for (j = 0; j < Table.TempEnd; ++j) {
 					// Look for the Variable, if we find it, set the pointer and stop.
-					if (!StrComp(BUFFER, Table.Vars[j].VarName)){
+					if (!StrComp(BUFFER, Table.Vars[j].VarName)) {
 						(*Indirect)->outparam[i] = &(Table.Vars[j].value);
 						break;
 					}
