@@ -359,20 +359,22 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 		switch(First->type){
 
 			case PASS:
-				if(!(First->outparam[0][0] == -1))
+				if(First->outparam[0][0] != -1)
 					First->outparam[0][0] = First->inparam[0][0];
 
 				break;
 			
 			case NOT:
-				First->outparam[0][0] = (First->inparam[0][0] == 1) ? 0 : 1;
+				if(First->outparam[0][0] != -1)
+					First->outparam[0][0] = (First->inparam[0][0] == 1) ? 0 : 1;
+
 				break;
 
 			case AND:
 				if(First->inparam[0][0] == 1 && First->inparam[1][0] == 1)
 					First->outparam[0][0] = 1;
 				else
-					if(!(First->outparam[0][0] == -1))
+					if(First->outparam[0][0] != -1)
 						First->outparam[0][0] = 0;
 
 				break;
@@ -381,7 +383,7 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 				if(First->inparam[0][0] == 1 && First->inparam[1][0] == 1)
 					First->outparam[0][0] = 0;
 				else
-					if(!(First->outparam[0][0] == -1))
+					if(First->outparam[0][0] != -1)
 						First->outparam[0][0] = 1;
 
 				break;
@@ -390,7 +392,7 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 				if(First->inparam[0][0] == 1 || First->inparam[1][0] == 1)
 					First->outparam[0][0] = 0;
 				else
-					if(!(First->outparam[0][0] == -1))
+					if(First->outparam[0][0] != -1)
 						First->outparam[0][0] = 1;
 
 				break;
@@ -399,7 +401,7 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 				if(First->inparam[0][0] == 1 || First->inparam[1][0] == 1)
 					First->outparam[0][0] = 1;
 				else
-					if(!(First->outparam[0][0] == -1))
+					if(First->outparam[0][0] != -1)
 						First->outparam[0][0] = 0;
 
 				break;
@@ -409,7 +411,7 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 					(First->inparam[0][0] == 0 && First->inparam[1][0] == 1))
 						First->outparam[0][0] = 1;
 				else
-					if(!(First->outparam[0][0] == -1))
+					if(First->outparam[0][0] != -1)
 						First->outparam[0][0] = 0;
 
 				break;
@@ -425,7 +427,7 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 					++incrementer;
 				}
 
-				if(!(First->outparam[bit][0] == -1))
+				if(First->outparam[bit][0] != -1)
 					First->outparam[bit][0] = 1;
 
 				break;
@@ -444,7 +446,7 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 					++incrementer;
 				}
 
-				if(!(First->outparam[0][0] == -1))
+				if(First->outparam[0][0] != -1)
 					First->outparam[0][0] = First->inparam[row][0];
 
 				break;
