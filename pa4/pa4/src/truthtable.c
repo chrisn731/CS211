@@ -237,9 +237,9 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 				break;
 
 			case 'N':
-				if(BUFFER[2] == 'T')
+				if (BUFFER[2] == 'T')
 					type = NOT;
-				else if(BUFFER[2] == 'N')
+				else if (BUFFER[2] == 'N')
 					type = NAND;
 				else
 					type = NOR;
@@ -271,7 +271,7 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 			(*Indirect)->NumOfIn = 1;
 			(*Indirect)->NumOfOut = 1;
 		}
-		else if(type < 7){
+		else if (type < 7) {
 			(*Indirect)->NumOfIn = 2;
 			(*Indirect)->NumOfOut = 1;
 		}
