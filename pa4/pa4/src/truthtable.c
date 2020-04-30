@@ -61,11 +61,7 @@ int StrComp(char *p1, char *p2)
 /* String Copy */
 void StrCopy(char *src, char *dest)
 {
-	char c1;
-	do {
-		c1 = *src++;
-		*dest++ = c1;
-	} while (c1 != '\0');
+	while ((*dest++ = *src++) != '\0');
 }
 
 void FreeTable(struct VarTable Table)
