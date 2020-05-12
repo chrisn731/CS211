@@ -3,90 +3,97 @@
 
 void convert(int numtoconvert)
 {
-
-	int i, counter = 0;
+	int Mcount, CMcount, Dcount, CDcount, Ccount, XCcount, Lcount, XLcount, Xcount, IXcount, Vcount, IVcount, Icount;
+	Mcount = Dcount = Ccount = Lcount = Xcount = Vcount = Icount = CMcount = CDcount = XCcount = XLcount = IXcount = IVcount = 0;
+	int i;
 	
 	if(numtoconvert >= 1000) {
-		counter = numtoconvert / 1000;
-		numtoconvert -= (counter * 1000);
-		for(i=0; i < counter; i++)
+		Mcount = numtoconvert / 1000;
+		numtoconvert -= (Mcount * 1000);
+		for(i=0; i < Mcount; i++)
 			printf("M");	
 	}
 
 	if(numtoconvert >= 500) {
 		if(numtoconvert / 900 == 1) {
+			CMcount = 1;
 			numtoconvert -= 900;
 			printf("CM");
 		}
 		else {
-			counter = numtoconvert / 500;
-			numtoconvert -= (counter * 500);
-			for(i = 0; i < counter; i++)
+			Dcount = numtoconvert / 500;
+			numtoconvert -= (Dcount * 500);
+			for(i = 0; i < Dcount; i++)
 				printf("D");
 		}
 	}
 	
 	if(numtoconvert >= 100) {
 		if(numtoconvert / 400 == 1) {
+			CDcount = 1;
 			numtoconvert -= 400;
 			printf("CD");
 		}
 		else { 
-			counter = numtoconvert / 100;
-			numtoconvert -= (counter * 100);
-			for(i = 0; i < counter; i++)
+			Ccount = numtoconvert / 100;
+			numtoconvert -= (Ccount * 100);
+			for(i = 0; i < Ccount; i++)
 				printf("C");
 		}
 	}
 
 	if(numtoconvert >= 50) {
 		if(numtoconvert / 90 == 1) {
+			XCcount = 1;
 			numtoconvert -= 90;
 			printf("XC");
 		}
 		else {
-			counter = numtoconvert / 50;
-			numtoconvert -= (counter * 50);
-			for(i = 0; i < counter; i++)
+			Lcount = numtoconvert / 50;
+			numtoconvert -= (Lcount * 50);
+			for(i = 0; i < Lcount; i++)
 				printf("L");
 		}
 	}
 	
 	if(numtoconvert >= 10) {
 		if(numtoconvert / 40 == 1) {
+			XLcount = 1;
 			numtoconvert -= 40;
 			printf("XL");
 		}
 		else {
-			counter = numtoconvert / 10;
-			numtoconvert -= (counter * 10);
-			for(i = 0; i < counter; i++)
+			Xcount = numtoconvert / 10;
+			numtoconvert -= (Xcount * 10);
+			for(i = 0; i < Xcount; i++)
 				printf("X");
 		}
 	}
 	
 	if(numtoconvert >= 5) {
 		if(numtoconvert / 9 == 1) { 
+			IXcount = 1;
 			numtoconvert -= 9;
 			printf("IX");
 		}
 		else { 
-			counter = numtoconvert / 5;
-			numtoconvert -= (counter * 5);
-			for(i = 0; i < counter; i++)
+			Vcount = numtoconvert / 5;
+			numtoconvert -= (Vcount * 5);
+			for(i = 0; i < Vcount; i++)
 				printf("V");
 		}
 	}
 
 	if(numtoconvert >= 1) {
 		if(numtoconvert / 4 == 1) {
+			IVcount = 1;
 			numtoconvert -= 4;		
 			printf("IV");
 		}
 		else {
-			counter = numtoconvert / 1;
-			numtoconvert -= (counter);
-			for(i = 0; i < counter; i++)
+			Icount = numtoconvert / 1;
+			numtoconvert -= (Icount);
+			for(i = 0; i < Icount; i++)
 				printf("I");
 		}
 	}
