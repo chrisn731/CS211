@@ -296,7 +296,8 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 		}
 
 		/*
-		 * Begin allocating space for our input parameters. The array will be int pointers so that we can refer to the
+		 * Begin allocating space for our input parameters.
+		 * The array will be int pointers so that we can refer to the
 		 * master variable table and quickly pull what value is currently stored there.
 		 */
 		(*Indirect)->inparam = malloc(sizeof(int*) * ((*Indirect)->NumOfIn));
@@ -306,8 +307,8 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 			fscanf(fp, "%16s", BUFFER);
 
 			/*
-			 * If it is a '0' , '1' , or '_' then point to the special case "binary" array. This array contains 0, 1,
-			 * and -1 for their respective symbols.
+			 * If it is a '0' , '1' , or '_' then point to the special case "binary" array.
+			 * This array contains 0, 1, and -1 for their respective symbols.
 			 */
 			if (BUFFER[0] == '0')
 				(*Indirect)->inparam[i] = &(binary[0]);
@@ -537,14 +538,16 @@ void SortGates(struct Gate **First, struct VarTable Table)
 						// If found, swap the gates, else go to the next gate.
 						if (found) {
 							tmp = *First;
-							*First = *swap;
 							tmp2 = (*swap)->next;
+
+							*First = *swap;
 							(*swap)->next = tmp;
 							*swap = tmp2;
 							break;
 						}
-						else
+						else {
 							swap = &((*swap)->next);
+						}
 					}
 					// Set the flagged variable back to 0.
 					Table.Vars[j].value = 0;
