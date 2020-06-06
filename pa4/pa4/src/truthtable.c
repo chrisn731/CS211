@@ -492,6 +492,7 @@ void SortGates(struct Gate **First, struct VarTable Table)
 {
 	int i, j, k, found, NumOfIn;
 	int *TempAddr, *TableAddr;
+	struct Gate **swap, *tmp, *tmp2;
 
 	while (*First != NULL) {
 		found = 0;
@@ -511,7 +512,7 @@ void SortGates(struct Gate **First, struct VarTable Table)
 
 					//Flag the temp Variable
 					Table.Vars[j].value = 1;
-					struct Gate **swap = &((*First)->next);
+					swap = &((*First)->next);
 					
 					/*
 					 * Go through the remaining gates and swap with the gate 
@@ -535,11 +536,11 @@ void SortGates(struct Gate **First, struct VarTable Table)
 						
 						// If found, swap the gates, else go to the next gate.
 						if (found) {
-							struct Gate *temp = *First;
+							tmp = *First;
 							*First = *swap;
-							struct Gate *temp2 = (*swap)->next;
-							(*swap)->next = temp;
-							*swap = temp2;
+							tmp2 = (*swap)->next;
+							(*swap)->next = tmp;
+							*swap = tmp2;
 							break;
 						}
 						else
