@@ -91,9 +91,7 @@ int Pow(int Base, int Exponent)
 	if (Exponent == 0)
 		return 1;
 
-	int i, total;
-
-	total = Base;
+	int i, total = Base;
 	for (i = 1; i < Exponent; ++i)
 		total *= Base;
 
@@ -167,7 +165,7 @@ void ReadIOVars(struct VarTable *Table, FILE *fp)
 void Search_For_Temps(struct VarTable *Table, FILE *fp)
 {
 	char BUFFER[17];
-	int NumOfIn, NumOfOut, i, j;
+	int NumOfIn, NumOfOut;
 	Table->TempEnd = Table->OutputEnd;
 
 	while (fscanf(fp, "%16s", BUFFER) != EOF) {
@@ -180,9 +178,8 @@ void Search_For_Temps(struct VarTable *Table, FILE *fp)
 		else if (BUFFER[0] == 'D' || BUFFER[0] == 'M') {
 			fscanf(fp, "%d", &NumOfIn);
 
-			if (BUFFER[0] == 'D') {
+			if (BUFFER[0] == 'D')
 				NumOfOut = Pow(2, NumOfIn);
-			}
 			else { 
 				NumOfOut = 1;
 				NumOfIn += Pow(2, NumOfIn);
@@ -199,9 +196,10 @@ void Search_For_Temps(struct VarTable *Table, FILE *fp)
 		 * Go through our current Variables and see if we already have that Variable.
 		 * If not, append it to our table.
 		 */
+		int i, j;
 		for (i = 0; i < (NumOfIn + NumOfOut); ++i) {
 			fscanf(fp, "%16s", BUFFER);
-			if (BUFFER[0] != '1' && BUFFER[0] != '0' && BUFFER[0] != '_') {
+			if ( !(BUFFER[0] == '1' || BUFFER[0] == '0' || BUFFER[0] == '_') ) {
 				for (j = 0; j < Table->TempEnd; ++j) {
 					if (!StrComp(BUFFER, Table->Vars[j].VarName))
 						break;
@@ -235,38 +233,38 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 		// Find what type of gate it is and assign the type
 		switch (BUFFER[0]) {
 
-		case 'D':
-			type = DECODER;
-			break;
+			case 'D':
+				type = DECODER;
+				break;
 
-		case 'M':
-			type = MULTIPLEXER;
-			break;
+			case 'M':
+				type = MULTIPLEXER;
+				break;
 
-		case 'N':
-			if (BUFFER[2] == 'T')
-				type = NOT;
-			else if (BUFFER[2] == 'N')
-				type = NAND;
-			else
-				type = NOR;
-			break;
+			case 'N':
+				if (BUFFER[2] == 'T')
+					type = NOT;
+				else if (BUFFER[2] == 'N')
+					type = NAND;
+				else
+					type = NOR;
+				break;
 
-		case 'P':
-			type = PASS;
-			break;
+			case 'P':
+				type = PASS;
+				break;
 
-		case 'O':
-			type = OR;
-			break;
+			case 'O':
+				type = OR;
+				break;
 
-		case 'A':
-			type = AND;
-			break;
+			case 'A':
+				type = AND;
+				break;
 
-		case 'X':
-			type = XOR;
-			break;
+			case 'X':
+				type = XOR;
+				break;
 		}
 
 		*Indirect = malloc(sizeof(struct Gate));
@@ -342,7 +340,7 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 			else if (BUFFER[0] == '_')
 				(*Indirect)->outparam[i] = &(binary[2]);
 		
-			else 
+			else {
 				for (j = 0; j < Table.TempEnd; ++j) {
 					// Look for the Variable, if we find it, set the pointer and stop.
 					if (!StrComp(BUFFER, Table.Vars[j].VarName)) {
@@ -350,6 +348,7 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 						break;
 					}
 				}
+			}
 		}
 
 		/* 
@@ -364,45 +363,6 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 	}
 }
 
-void Solve_Decoder(struct Gate *Decoder)
-{
-	int i, incrementer, bit;
-
-	incrementer = 1;
-	bit = 0;
-
-	for (i = 0; i < Decoder->NumOfIn; ++i) {
-		if (Decoder->inparam[i][0] == 1)
-			bit += Pow(2, Decoder->NumOfIn - incrementer);
-
-		incrementer++;
-	}
-
-	if (Decoder->outparam[bit][0] != -1)
-		Decoder->outparam[bit][0] = 1;
-
-}
-
-void Solve_Multiplexer(struct Gate *Plex)
-{
-	int i, selectorindex, totalinputs, row, incrementer;
-
-	selectorindex = Pow(2, Plex->NumOfIn);
-	totalinputs = selectorindex + Plex->NumOfIn;
-	row = 0;
-	incrementer = 1;
-
-	for (i = selectorindex; i < totalinputs; ++i) {
-		if (Plex->inparam[i][0] == 1)
-			row += Pow(2, Plex->NumOfIn - incrementer);
-
-		++incrementer;
-	}
-
-	if (Plex->outparam[0][0] != -1)
-		Plex->outparam[0][0] = Plex->inparam[row][0];
-
-}
 /* This function runs through the gates and attempts to solve for the truthtable. */
 void DoCircuit(struct Gate *First, struct VarTable Table)
 {
@@ -410,75 +370,102 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 	 * Keep looping until we have no more gates.
 	 * If the output param holds a value of -1, discard the output.
 	 */
-
 	while (First != NULL) {
 		switch (First->type) {
 
-		case PASS:
-			if (First->outparam[0][0] != -1)
-				First->outparam[0][0] = First->inparam[0][0];
-
-			break;
-		
-		case NOT:
-			if (First->outparam[0][0] != -1)
-				First->outparam[0][0] = (First->inparam[0][0] == 1) ? 0 : 1;
-
-			break;
-
-		case AND:
-			if (First->inparam[0][0] == 1 && First->inparam[1][0] == 1)
-				First->outparam[0][0] = 1;
-			else
+			case PASS:
 				if (First->outparam[0][0] != -1)
-					First->outparam[0][0] = 0;
+					First->outparam[0][0] = First->inparam[0][0];
 
-			break;
-
-		case NAND:
-			if (First->inparam[0][0] == 1 && First->inparam[1][0] == 1)
-				First->outparam[0][0] = 0;
-			else
+				break;
+			
+			case NOT:
 				if (First->outparam[0][0] != -1)
+					First->outparam[0][0] = (First->inparam[0][0] == 1) ? 0 : 1;
+
+				break;
+
+			case AND:
+				if (First->inparam[0][0] == 1 && First->inparam[1][0] == 1)
 					First->outparam[0][0] = 1;
+				else
+					if (First->outparam[0][0] != -1)
+						First->outparam[0][0] = 0;
 
-			break;
+				break;
 
-		case NOR:
-			if (First->inparam[0][0] == 1 || First->inparam[1][0] == 1)
-				First->outparam[0][0] = 0;
-			else
-				if (First->outparam[0][0] != -1)
+			case NAND:
+				if (First->inparam[0][0] == 1 && First->inparam[1][0] == 1)
+					First->outparam[0][0] = 0;
+				else
+					if (First->outparam[0][0] != -1)
+						First->outparam[0][0] = 1;
+
+				break;
+
+			case NOR:
+				if (First->inparam[0][0] == 1 || First->inparam[1][0] == 1)
+					First->outparam[0][0] = 0;
+				else
+					if (First->outparam[0][0] != -1)
+						First->outparam[0][0] = 1;
+
+				break;
+
+			case OR:
+				if (First->inparam[0][0] == 1 || First->inparam[1][0] == 1)
 					First->outparam[0][0] = 1;
+				else
+					if (First->outparam[0][0] != -1)
+						First->outparam[0][0] = 0;
 
-			break;
+				break;
 
-		case OR:
-			if (First->inparam[0][0] == 1 || First->inparam[1][0] == 1)
-				First->outparam[0][0] = 1;
-			else
+			case XOR:
+				if ((First->inparam[0][0] == 1 && First->inparam[1][0] == 0) || 
+				    (First->inparam[0][0] == 0 && First->inparam[1][0] == 1))
+					First->outparam[0][0] = 1;
+				else
+					if (First->outparam[0][0] != -1)
+						First->outparam[0][0] = 0;
+
+				break;
+
+			case DECODER:
+			{
+				int i, incrementer = 1, bit = 0;
+
+				for (i = 0; i < First->NumOfIn; ++i) {
+					if (First->inparam[i][0] == 1)
+						bit += Pow(2, First->NumOfIn - incrementer);
+
+					++incrementer;
+				}
+
+				if (First->outparam[bit][0] != -1)
+					First->outparam[bit][0] = 1;
+
+				break;
+			}	
+
+			case MULTIPLEXER:
+			{
+				int i, selectorindex = (Pow(2, First->NumOfIn));
+				int totalinputs = selectorindex + First->NumOfIn;
+				int row = 0, incrementer = 1;
+
+				for (i = selectorindex; i < totalinputs; ++i) {
+					if (First->inparam[i][0] == 1)
+						row += Pow(2, First->NumOfIn - incrementer);
+
+					++incrementer;
+				}
+
 				if (First->outparam[0][0] != -1)
-					First->outparam[0][0] = 0;
+					First->outparam[0][0] = First->inparam[row][0];
 
-			break;
-
-		case XOR:
-			if ((First->inparam[0][0] == 1 && First->inparam[1][0] == 0) || 
-				(First->inparam[0][0] == 0 && First->inparam[1][0] == 1))
-				First->outparam[0][0] = 1;
-			else
-				if (First->outparam[0][0] != -1)
-					First->outparam[0][0] = 0;
-
-			break;
-
-		case DECODER:
-			Solve_Decoder(First);
-			break;
-
-		case MULTIPLEXER:
-			Solve_Multiplexer(First);
-			break;
+				break;
+			}
 		}
 		// Go to the following gate.
 		First = First->next;
@@ -489,7 +476,7 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 
 void SortGates(struct Gate **First, struct VarTable Table)
 {
-	int i, j, k, found, NumOfIn;
+	int i, j, found, NumOfIn;
 	int *TempAddr, *TableAddr;
 
 	while (*First != NULL) {
@@ -517,6 +504,7 @@ void SortGates(struct Gate **First, struct VarTable Table)
 					 * variable in its output.
 					 */
 					while (*swap != NULL) {
+						int k;
 						
 						/*
 						 * Check if the current gate holds that flagged variable. If the gate does have that variable
