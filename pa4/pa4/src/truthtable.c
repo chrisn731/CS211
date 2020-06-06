@@ -318,13 +318,14 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 			else if (BUFFER[0] == '_')
 				(*Indirect)->inparam[i] = &(binary[2]);
 
-			else {
+			else 
 				for (j = 0; j < Table.TempEnd; ++j) {
 					// Look for the Variable, if we find it, set the pointer and stop.
-					if (!StrComp(BUFFER, Table.Vars[j].VarName))
+					if (!StrComp(BUFFER, Table.Vars[j].VarName)) {
 						(*Indirect)->inparam[i] = &(Table.Vars[j].value);
+						break;
+					}
 				}
-			}
 		}
 
 		// Allocate space for pointers to our output variables using the same ideas as above.
@@ -513,15 +514,17 @@ void SortGates(struct Gate **First, struct VarTable Table)
 					struct Gate **swap = &((*First)->next);
 					
 					/*
-					 * Go through the remaining gates and swap with the gate if the gate contains the flagged temporary 
-					 * variable in its output.
+					 * Go through the remaining gates and swap with the gate 
+					 * if the gate contains the flagged temporary variable in its output.
 					 */
 					while (*swap != NULL) {
 						
 						/*
-						 * Check if the current gate holds that flagged variable. If the gate does have that variable
-						 * in it's output, that must mean our "current" gate uses it as an input before "swap" assigns
-						 * it a value. Therefore flag it, and prepare to swap it.
+						 * Check if the current gate holds that flagged variable.
+						 * If the gate does have that variable in it's output, that must mean
+						 * our "current" gate uses it as an input before "swap" assigns
+						 * it a value. 
+						 * Therefore flag it, and prepare to swap it.
 						 */
 						for (k = 0; k < ((*swap)->NumOfOut); ++k) {
 							if ((*swap)->outparam[k][0] == 1) {
