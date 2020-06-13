@@ -497,7 +497,7 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
  * Iterate through all inputs of a gate and check if it holds a temp variable.
  * If a temporary variable is found, flag it and search through other gates for
  * that flagged variable as its output. If a gate is found that satisfies that
- * satisfies that condition, swap the gates.
+ * satisfies that condition, swap the gates and restart the search.
  */
 void SortGates(struct Gate **First, struct VarTable Table)
 {
