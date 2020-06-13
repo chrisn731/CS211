@@ -505,6 +505,7 @@ void SortGates(struct Gate **First, struct VarTable Table)
 	int *TempAddr, *TableAddr;
 	struct Gate **swap;
 
+swapped:
 	while (*First != NULL) {
 		found = 0;
 		// check for Multiplexer special case in which NumOfIn isn't simply the number attached to the gate.
@@ -551,7 +552,7 @@ void SortGates(struct Gate **First, struct VarTable Table)
 					Table.Vars[j].value = 0;
 
 					if (found)
-						goto swap;
+						goto swapped;
 
 				}
 			}
@@ -559,9 +560,6 @@ void SortGates(struct Gate **First, struct VarTable Table)
 		// Only procced to the next gate if we didn't swap.
 		if (!found)
 			First = &((*First)->next);
-
-swap:
-		continue;
 	}
 }
 
