@@ -557,9 +557,8 @@ swapped:
 				}
 			}
 		}
-		// Only procced to the next gate if we didn't swap.
-		if (!found)
-			First = &((*First)->next);
+
+		First = &((*First)->next);
 	}
 }
 
