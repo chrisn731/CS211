@@ -537,7 +537,7 @@ swapped:
 						int k;
 
 						for (k = 0; k < ((*swap)->NumOfOut); ++k) {
-							if ((*swap)->outparam[k][0] == 1) {
+							if (*(*swap)->outparam[k] == 1) {
 								found = 1;
 								break;
 							}
