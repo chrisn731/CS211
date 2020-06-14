@@ -293,7 +293,7 @@ void CreateGates(struct Gate **First, struct VarTable *Table, int *binary, FILE 
 				(*Indirect)->NumOfOut = 1 << inputs;
 			}
 			else {
-				(*Indirect)->NumOfIn = (inputs + (1 << inputs));
+				(*Indirect)->NumOfIn = inputs + (1 << inputs);
 				(*Indirect)->NumOfOut = 1;
 			}
 		}
