@@ -184,11 +184,11 @@ void Search_For_Temps(struct VarTable *Table, FILE *fp)
 			fscanf(fp, "%d", &NumOfIn);
 
 			if (BUFFER[0] == 'D') {
-				NumOfOut = Pow(2, NumOfIn);
+				NumOfOut = 1 << NumOfIn;
 			}
 			else {
 				NumOfOut = 1;
-				NumOfIn += Pow(2, NumOfIn);
+				NumOfIn += 1 << NumOfIn;
 			}
 
 		}
@@ -290,10 +290,10 @@ void CreateGates(struct Gate **First, struct VarTable *Table, int *binary, FILE 
 			fscanf(fp, "%d", &inputs);
 			if (type == DECODER) {
 				(*Indirect)->NumOfIn = inputs;
-				(*Indirect)->NumOfOut = Pow(2, inputs);
+				(*Indirect)->NumOfOut = 1 << inputs;
 			}
 			else {
-				(*Indirect)->NumOfIn = (inputs + Pow(2,inputs));
+				(*Indirect)->NumOfIn = (inputs + (1 << inputs));
 				(*Indirect)->NumOfOut = 1;
 			}
 		}
@@ -364,7 +364,7 @@ void CreateGates(struct Gate **First, struct VarTable *Table, int *binary, FILE 
 		 * Right now NumOfIn = inputs + Pow(2,inputs), so get rid of that power so NumOfIn - Pow = inputs.
 		 */
 		if (type == MULTIPLEXER)
-			(*Indirect)->NumOfIn -= Pow(2,inputs);
+			(*Indirect)->NumOfIn -= 1 << inputs;
 
 		// Once finished, move on to the next directive.
 		Indirect = &((*Indirect)->next);
@@ -380,7 +380,7 @@ void Solve_Decoder(struct Gate *Decoder)
 
 	for (i = 0; i < Decoder->NumOfIn; ++i) {
 		if (*Decoder->inparam[i] == 1)
-			bit += Pow(2, Decoder->NumOfIn - incrementer);
+			bit += 1 << (Decoder->NumOfIn - incrementer);
 
 		incrementer++;
 	}
@@ -394,14 +394,14 @@ void Solve_Multiplexer(struct Gate *Plex)
 {
 	int i, selectorindex, totalinputs, row, incrementer;
 
-	selectorindex = Pow(2, Plex->NumOfIn);
+	selectorindex = 1 << Plex->NumOfIn;
 	totalinputs = selectorindex + Plex->NumOfIn;
 	row = 0;
 	incrementer = 1;
 
 	for (i = selectorindex; i < totalinputs; ++i) {
 		if (*Plex->inparam[i] == 1)
-			row += Pow(2, Plex->NumOfIn - incrementer);
+			row += 1 << (Plex->NumOfIn - incrementer);
 
 		++incrementer;
 	}
@@ -520,7 +520,7 @@ swapped:
 		found = 0;
 
 		if ((*First)->type == MULTIPLEXER)
-			NumOfIn = (*First)->NumOfIn + Pow(2, (*First)->NumOfIn);
+			NumOfIn = (*First)->NumOfIn + (1 << (*First)->NumOfIn);
 		else
 			NumOfIn = (*First)->NumOfIn;
 
