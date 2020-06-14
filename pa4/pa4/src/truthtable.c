@@ -433,48 +433,57 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 			break;
 
 		case AND:
-			if (*First->inparam[0] == 1 && *First->inparam[1] == 1)
+			if (*First->inparam[0] == 1 && *First->inparam[1] == 1) {
 				*First->outparam[0] = 1;
-			else
+			}
+			else {
 				if (*First->outparam[0] != -1)
 					*First->outparam[0] = 0;
-
+			}
 			break;
 
 		case NAND:
-			if (*First->inparam[0] == 1 && *First->inparam[1] == 1)
+			if (*First->inparam[0] == 1 && *First->inparam[1] == 1) {
 				*First->outparam[0] = 0;
-			else
+			}
+			else {
 				if (*First->outparam[0] != -1)
 					*First->outparam[0] = 1;
+			}
 
 			break;
 
 		case NOR:
-			if (*First->inparam[0] == 1 || *First->inparam[1] == 1)
+			if (*First->inparam[0] == 1 || *First->inparam[1] == 1) {
 				*First->outparam[0] = 0;
-			else
+			}
+			else {
 				if (*First->outparam[0] != -1)
 					*First->outparam[0] = 1;
+			}
 
 			break;
 
 		case OR:
-			if (*First->inparam[0] == 1 || *First->inparam[1] == 1)
+			if (*First->inparam[0] == 1 || *First->inparam[1] == 1) {
 				*First->outparam[0] = 1;
-			else
+			}
+			else {
 				if (*First->outparam[0] != -1)
 					*First->outparam[0] = 0;
+			}
 
 			break;
 
 		case XOR:
 			if ((*First->inparam[0] == 1 && *First->inparam[1] == 0) ||
-				(*First->inparam[0] == 0 && *First->inparam[1] == 1))
+				(*First->inparam[0] == 0 && *First->inparam[1] == 1)) {
 				*First->outparam[0] = 1;
-			else
+			}
+			else {
 				if (*First->outparam[0] != -1)
 					*First->outparam[0] = 0;
+			}
 
 			break;
 
