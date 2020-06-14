@@ -518,7 +518,10 @@ swapped:
 	while (*First != NULL) {
 		found = 0;
 		// check for Multiplexer special case in which NumOfIn isn't simply the number attached to the gate.
-		NumOfIn = ((*First)->type == 8) ? ((*First)->NumOfIn + Pow(2, (*First)->NumOfIn)) : (*First)->NumOfIn;
+		if ((*First)->type == MULTIPLEXER)
+			NumOfIn = (*First)->NumOfIn + Pow(2, (*First)->NumOfIn);
+		else
+			NumOfIn = (*First)->NumOfIn;
 
 		for (i = 0; i < NumOfIn; ++i) {
 			TempAddr = (*First)->inparam[i];
