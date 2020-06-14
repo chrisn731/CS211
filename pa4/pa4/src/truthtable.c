@@ -72,6 +72,7 @@ void FreeTable(struct VarTable *Table)
 		free(Table->Vars[i].VarName);
 
 	free(Table->Vars);
+	free(Table);
 }
 
 void FreeGates(struct Gate *List)
