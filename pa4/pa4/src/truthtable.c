@@ -620,13 +620,13 @@ int main(int argc, char *argv[])
 	}
 
 	// Initalize the Master Variable Table.
-	struct VarTable Table;
+	struct VarTable *Table = malloc(sizeof(*Table));
 
 	// Read in the Input/Output Variables and add them to the table.
-	ReadIOVars(&Table, fp);
+	ReadIOVars(Table, fp);
 
 	// Get all the temporary variables and add them to the table.
-	Search_For_Temps(&Table, fp);
+	Search_For_Temps(Table, fp);
 
 	// Create the "First" gate and the constants values array
 	struct Gate *First = NULL;
@@ -635,20 +635,20 @@ int main(int argc, char *argv[])
 	rewind(fp);
 
 	// Go through the file and start making the gates based on directives.
-	CreateGates(&First, &Table, binary, fp);
+	CreateGates(&First, Table, binary, fp);
 	fclose(fp);
 
 	/*
 	 * Go through the gates and make sure they are in the right order.
 	 * (A temporary variable isn't being used before it is assigned a value.)
 	 */
-	SortGates(&First, &Table);
+	SortGates(&First, Table);
 
 	// Solve the circuit...
-	Solve_Truth_Table(First, &Table);
+	Solve_Truth_Table(First, Table);
 
 	// ... free memory, and gracefully finish.
-	FreeTable(&Table);
+	FreeTable(Table);
 	FreeGates(First);
 	return 0;
 }
