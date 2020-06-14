@@ -421,19 +421,19 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 		switch (First->type) {
 
 		case PASS:
-			if (First->outparam[0][0] != -1)
+			if (**First->outparam != -1)
 				First->outparam[0][0] = First->inparam[0][0];
 
 			break;
 
 		case NOT:
-			if (First->outparam[0][0] != -1)
+			if (**First->outparam != -1)
 				First->outparam[0][0] = (First->inparam[0][0] == 1) ? 0 : 1;
 
 			break;
 
 		case AND:
-			if (First->inparam[0][0] == 1 && First->inparam[1][0] == 1)
+			if (**First->inparam == 1 && First->inparam[1][0] == 1)
 				First->outparam[0][0] = 1;
 			else
 				if (First->outparam[0][0] != -1)
