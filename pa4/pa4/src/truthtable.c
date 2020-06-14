@@ -88,21 +88,6 @@ void FreeGates(struct Gate *List)
 	}
 }
 
-/* Math Power Function. Base ^ Exponent */
-int Pow(int Base, int Exponent)
-{
-	int i, total;
-
-	if (Exponent == 0)
-		return 1;
-
-	total = Base;
-	for (i = 1; i < Exponent; ++i)
-		total *= Base;
-
-	return total;
-}
-
 /* Print the values of inputs & outputs of the table. */
 void PrintTableValues(struct VarTable *Table)
 {
@@ -125,7 +110,10 @@ void PrintTableValues(struct VarTable *Table)
 
 // ====================================== End Of Utility Functions ====================================================
 
-/* Read the first two lines of the input file, getting all the basic Input/Output Variables adding them to the Table. */
+/*
+ * Read the first two lines of the input file, getting all the basic
+ * Input/Output Variables adding them to the Table.
+ */
 void ReadIOVars(struct VarTable *Table, FILE *fp)
 {
 	// Scan the 'INPUT' string and the number of input variables
@@ -165,7 +153,8 @@ void ReadIOVars(struct VarTable *Table, FILE *fp)
 
 /*
  * Continue from where I/O Vars left off.
- * Searching through the directives to find any temporary variables appending them to the Variable Table.
+ * Searching through the directives to find any temporary variables
+ * appending them to the Variable Table.
  */
 void Search_For_Temps(struct VarTable *Table, FILE *fp)
 {
@@ -360,8 +349,8 @@ void CreateGates(struct Gate **First, struct VarTable *Table, int *binary, FILE 
 		}
 
 		/*
-		 * Just to make life simpler, I want the # of selectors of the Multiplexer, not total amount of inputs.
-		 * Right now NumOfIn = inputs + Pow(2,inputs), so get rid of that power so NumOfIn - Pow = inputs.
+		 * Just to make life simpler, I want the # of selectors of
+		 * the Multiplexer, not total amount of inputs.
 		 */
 		if (type == MULTIPLEXER)
 			(*Indirect)->NumOfIn -= 1 << inputs;
