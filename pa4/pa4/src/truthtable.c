@@ -64,14 +64,14 @@ void StrCopy(char *src, char *dest)
 	while ((*dest++ = *src++) != '\0');
 }
 
-void FreeTable(struct VarTable Table)
+void FreeTable(struct VarTable *Table)
 {
 	int i;
 
-	for (i = 0; i < Table.TempEnd; ++i)
-		free(Table.Vars[i].VarName);
+	for (i = 0; i < Table->TempEnd; ++i)
+		free(Table->Vars[i].VarName);
 
-	free(Table.Vars);
+	free(Table->Vars);
 }
 
 void FreeGates(struct Gate *List)
@@ -103,20 +103,20 @@ int Pow(int Base, int Exponent)
 }
 
 /* Print the values of inputs & outputs of the table. */
-void PrintTableValues(struct VarTable Table)
+void PrintTableValues(struct VarTable *Table)
 {
 	int i;
 
-	for (i = 0; i < Table.InputEnd; ++i)
-		printf("%d ", Table.Vars[i].value);
+	for (i = 0; i < Table->InputEnd; ++i)
+		printf("%d ", Table->Vars[i].value);
 
 	printf("| ");
 
-	for (; i < Table.OutputEnd; ++i) {
-		if (i+1 == Table.OutputEnd)
-			printf("%d",Table.Vars[i].value);
+	for (; i < Table->OutputEnd; ++i) {
+		if (i+1 == Table->OutputEnd)
+			printf("%d",Table->Vars[i].value);
 		else
-			printf("%d ", Table.Vars[i].value);
+			printf("%d ", Table->Vars[i].value);
 
 	}
 	printf("\n");
@@ -222,7 +222,7 @@ void Search_For_Temps(struct VarTable *Table, FILE *fp)
 }
 
 /* Create the Logic Gates and link them together in a linked list style. */
-void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *fp)
+void CreateGates(struct Gate **First, struct VarTable *Table, int *binary, FILE *fp)
 {
 	struct Gate **Indirect = First;
 	char BUFFER[17], SKIP[8192];
@@ -322,10 +322,10 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 				(*Indirect)->inparam[i] = &(binary[2]);
 			}
 			else {
-				for (j = 0; j < Table.TempEnd; ++j) {
+				for (j = 0; j < Table->TempEnd; ++j) {
 					// Look for the Variable, if we find it, set the pointer and stop.
-					if (!StrComp(BUFFER, Table.Vars[j].VarName)) {
-						(*Indirect)->inparam[i] = &(Table.Vars[j].value);
+					if (!StrComp(BUFFER, Table->Vars[j].VarName)) {
+						(*Indirect)->inparam[i] = &(Table->Vars[j].value);
 						break;
 					}
 				}
@@ -348,10 +348,10 @@ void CreateGates(struct Gate **First, struct VarTable Table, int *binary, FILE *
 				(*Indirect)->outparam[i] = &(binary[2]);
 			}
 			else {
-				for (j = 0; j < Table.TempEnd; ++j) {
+				for (j = 0; j < Table->TempEnd; ++j) {
 					// Look for the Variable, if we find it, set the pointer and stop.
-					if (!StrComp(BUFFER, Table.Vars[j].VarName)) {
-						(*Indirect)->outparam[i] = &(Table.Vars[j].value);
+					if (!StrComp(BUFFER, Table->Vars[j].VarName)) {
+						(*Indirect)->outparam[i] = &(Table->Vars[j].value);
 						break;
 					}
 				}
@@ -410,7 +410,7 @@ void Solve_Multiplexer(struct Gate *Plex)
 
 }
 /* This function runs through the gates and attempts to solve for the truthtable. */
-void DoCircuit(struct Gate *First, struct VarTable Table)
+void DoCircuit(struct Gate *First, struct VarTable *Table)
 {
 	/*
 	 * Keep looping until we have no more gates.
@@ -508,7 +508,7 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
  * that flagged variable as its output. If a gate is found that satisfies that
  * satisfies that condition, swap the gates and restart the search.
  */
-void SortGates(struct Gate **First, struct VarTable Table)
+void SortGates(struct Gate **First, struct VarTable *Table)
 {
 	int i, j, found, NumOfIn;
 	int *TempAddr, *TableAddr;
@@ -523,13 +523,13 @@ swapped:
 		for (i = 0; i < NumOfIn; ++i) {
 			TempAddr = (*First)->inparam[i];
 
-			for (j = Table.OutputEnd; j < Table.TempEnd; ++j) {
-				TableAddr = &(Table.Vars[j].value);
+			for (j = Table->OutputEnd; j < Table->TempEnd; ++j) {
+				TableAddr = &(Table->Vars[j].value);
 
 				if (TempAddr == TableAddr) {
 
 					//Flag the temp Variable
-					Table.Vars[j].value = 1;
+					Table->Vars[j].value = 1;
 					swap = &((*First)->next);
 
 					while (*swap != NULL) {
@@ -557,7 +557,7 @@ swapped:
 						}
 					}
 					// Set the flagged variable back to 0.
-					Table.Vars[j].value = 0;
+					Table->Vars[j].value = 0;
 
 					if (found)
 						goto swapped;
@@ -571,9 +571,11 @@ swapped:
 }
 
 /* Function to iterate our inputs. Every iteration calls DoCircuit. */
-void Solve_Truth_Table(struct Gate *First, struct VarTable Table)
+void Solve_Truth_Table(struct Gate *First, struct VarTable *Table)
 {
-	int i, start = (Table.InputEnd-1);
+	int i, start;
+
+	start = (Table->InputEnd - 1);
 	// Do the case where all Inputs are 0
 	DoCircuit(First, Table);
 
@@ -584,20 +586,20 @@ void Solve_Truth_Table(struct Gate *First, struct VarTable Table)
 	for (i = start; i >= 0; --i) {
 
 		// If the current variable is a 0, flip it to 1 and reset back to the first var.
-		if (Table.Vars[i].value == 0) {
-			Table.Vars[i].value = 1;
+		if (Table->Vars[i].value == 0) {
+			Table->Vars[i].value = 1;
 			i = start + 1;
 		}
 
 		// If the current variable is a 1, we can flip the bit and move to next var as if we were to "carry" in addition
-		else if (Table.Vars[i].value == 1)
-			Table.Vars[i].value = 0;
+		else if (Table->Vars[i].value == 1)
+			Table->Vars[i].value = 0;
 
 		// If we did flip a bit and restart, that means we have yet to get to the last bit so do the circuit.
 		if (i == start + 1) {
 			int j;
-			for (j = Table.InputEnd; j < Table.TempEnd; ++j)
-				Table.Vars[j].value = 0;
+			for (j = Table->InputEnd; j < Table->TempEnd; ++j)
+				Table->Vars[j].value = 0;
 
 			DoCircuit(First, Table);
 		}
@@ -633,20 +635,20 @@ int main(int argc, char *argv[])
 	rewind(fp);
 
 	// Go through the file and start making the gates based on directives.
-	CreateGates(&First, Table, binary, fp);
+	CreateGates(&First, &Table, binary, fp);
 	fclose(fp);
 
 	/*
 	 * Go through the gates and make sure they are in the right order.
 	 * (A temporary variable isn't being used before it is assigned a value.)
 	 */
-	SortGates(&First, Table);
+	SortGates(&First, &Table);
 
 	// Solve the circuit...
-	Solve_Truth_Table(First, Table);
+	Solve_Truth_Table(First, &Table);
 
 	// ... free memory, and gracefully finish.
-	FreeTable(Table);
+	FreeTable(&Table);
 	FreeGates(First);
 	return 0;
 }
