@@ -517,7 +517,7 @@ void SortGates(struct Gate **First, struct VarTable *Table)
 swapped:
 	while (*First != NULL) {
 		found = 0;
-		// check for Multiplexer special case in which NumOfIn isn't simply the number attached to the gate.
+
 		if ((*First)->type == MULTIPLEXER)
 			NumOfIn = (*First)->NumOfIn + Pow(2, (*First)->NumOfIn);
 		else
