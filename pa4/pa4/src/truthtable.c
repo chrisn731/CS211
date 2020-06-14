@@ -378,14 +378,14 @@ void Solve_Decoder(struct Gate *Decoder)
 	bit = 0;
 
 	for (i = 0; i < Decoder->NumOfIn; ++i) {
-		if (Decoder->inparam[i][0] == 1)
+		if (*Decoder->inparam[i] == 1)
 			bit += Pow(2, Decoder->NumOfIn - incrementer);
 
 		incrementer++;
 	}
 
-	if (Decoder->outparam[bit][0] != -1)
-		Decoder->outparam[bit][0] = 1;
+	if (*Decoder->outparam[bit] != -1)
+		*Decoder->outparam[bit] = 1;
 
 }
 
@@ -399,14 +399,14 @@ void Solve_Multiplexer(struct Gate *Plex)
 	incrementer = 1;
 
 	for (i = selectorindex; i < totalinputs; ++i) {
-		if (Plex->inparam[i][0] == 1)
+		if (*Plex->inparam[i] == 1)
 			row += Pow(2, Plex->NumOfIn - incrementer);
 
 		++incrementer;
 	}
 
-	if (Plex->outparam[0][0] != -1)
-		Plex->outparam[0][0] = Plex->inparam[row][0];
+	if (*Plex->outparam[0] != -1)
+		*Plex->outparam[0] = *Plex->inparam[row];
 
 }
 /* This function runs through the gates and attempts to solve for the truthtable. */
@@ -421,60 +421,60 @@ void DoCircuit(struct Gate *First, struct VarTable Table)
 		switch (First->type) {
 
 		case PASS:
-			if (**First->outparam != -1)
-				First->outparam[0][0] = First->inparam[0][0];
+			if (*First->outparam[0] != -1)
+				*First->outparam[0] = *First->inparam[0];
 
 			break;
 
 		case NOT:
-			if (**First->outparam != -1)
-				First->outparam[0][0] = (First->inparam[0][0] == 1) ? 0 : 1;
+			if (*First->outparam[0] != -1)
+				*First->outparam[0] = (*First->inparam[0] == 1) ? 0 : 1;
 
 			break;
 
 		case AND:
-			if (**First->inparam == 1 && First->inparam[1][0] == 1)
-				First->outparam[0][0] = 1;
+			if (*First->inparam[0] == 1 && *First->inparam[1] == 1)
+				*First->outparam[0] = 1;
 			else
-				if (First->outparam[0][0] != -1)
-					First->outparam[0][0] = 0;
+				if (*First->outparam[0] != -1)
+					*First->outparam[0] = 0;
 
 			break;
 
 		case NAND:
-			if (First->inparam[0][0] == 1 && First->inparam[1][0] == 1)
-				First->outparam[0][0] = 0;
+			if (*First->inparam[0] == 1 && *First->inparam[1] == 1)
+				*First->outparam[0] = 0;
 			else
-				if (First->outparam[0][0] != -1)
-					First->outparam[0][0] = 1;
+				if (*First->outparam[0] != -1)
+					*First->outparam[0] = 1;
 
 			break;
 
 		case NOR:
-			if (First->inparam[0][0] == 1 || First->inparam[1][0] == 1)
-				First->outparam[0][0] = 0;
+			if (*First->inparam[0] == 1 || *First->inparam[1] == 1)
+				*First->outparam[0] = 0;
 			else
-				if (First->outparam[0][0] != -1)
-					First->outparam[0][0] = 1;
+				if (*First->outparam[0] != -1)
+					*First->outparam[0] = 1;
 
 			break;
 
 		case OR:
-			if (First->inparam[0][0] == 1 || First->inparam[1][0] == 1)
-				First->outparam[0][0] = 1;
+			if (*First->inparam[0] == 1 || *First->inparam[1] == 1)
+				*First->outparam[0] = 1;
 			else
-				if (First->outparam[0][0] != -1)
-					First->outparam[0][0] = 0;
+				if (*First->outparam[0] != -1)
+					*First->outparam[0] = 0;
 
 			break;
 
 		case XOR:
-			if ((First->inparam[0][0] == 1 && First->inparam[1][0] == 0) ||
-				(First->inparam[0][0] == 0 && First->inparam[1][0] == 1))
-				First->outparam[0][0] = 1;
+			if ((*First->inparam[0] == 1 && *First->inparam[1] == 0) ||
+				(*First->inparam[0] == 0 && *First->inparam[1] == 1))
+				*First->outparam[0] = 1;
 			else
-				if (First->outparam[0][0] != -1)
-					First->outparam[0][0] = 0;
+				if (*First->outparam[0] != -1)
+					*First->outparam[0] = 0;
 
 			break;
 
