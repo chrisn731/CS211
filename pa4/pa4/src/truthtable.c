@@ -545,12 +545,11 @@ swapped:
 
 						// If found, swap the gates, else go to the next gate.
 						if (found) {
-							struct Gate *tmp = *First;
-							struct Gate *tmp2 = (*swap)->next;
+							struct Gate *tmp = (*swap)->next;
 
+							(*swap)->next = *First;
 							*First = *swap;
-							(*swap)->next = tmp;
-							*swap = tmp2;
+							*swap = tmp;
 							break;
 						}
 						else {
