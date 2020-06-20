@@ -163,13 +163,11 @@ void Search_For_Temps(struct VarTable *Table, FILE *fp)
 	Table->TempEnd = Table->OutputEnd;
 
 	while (fscanf(fp, "%16s", BUFFER) != EOF) {
-		// Check if its a 'NOT' or 'PASS' Gate
+		/* Based on the gate type we can determine its inputs & outputs */
 		if ((BUFFER[0] == 'N' && BUFFER[2] == 'T') || BUFFER[0] == 'P') {
 			NumOfIn = 1;
 			NumOfOut = 1;
-		}
-		// Check if it's Decoder or Multiplexer
-		else if (BUFFER[0] == 'D' || BUFFER[0] == 'M') {
+		} else if (BUFFER[0] == 'D' || BUFFER[0] == 'M') {
 			fscanf(fp, "%d", &NumOfIn);
 
 			if (BUFFER[0] == 'D') {
@@ -180,9 +178,7 @@ void Search_For_Temps(struct VarTable *Table, FILE *fp)
 				NumOfIn += 1 << NumOfIn;
 			}
 
-		}
-		// If it's not the previous choices, it must have only 2 inputs and 1 output.
-		else {
+		} else {
 			NumOfIn = 2;
 			NumOfOut = 1;
 		}
@@ -214,7 +210,7 @@ void Search_For_Temps(struct VarTable *Table, FILE *fp)
 /* Create the Logic Gates and link them together in a linked list style. */
 void CreateGates(struct Gate **First, struct VarTable *Table, int *binary, FILE *fp)
 {
-	struct Gate **Indirect = First;
+	struct Gate *NewGate, **Indirect = First;
 	char BUFFER[17], SKIP[8192];
 	kind_t type;
 	int inputs, i, j;
@@ -262,28 +258,27 @@ void CreateGates(struct Gate **First, struct VarTable *Table, int *binary, FILE 
 		}
 
 		*Indirect = malloc(sizeof(struct Gate));
-		(*Indirect)->next = NULL;
-		(*Indirect)->type = type;
+		NewGate = *Indirect;
+
+		NewGate->next = NULL;
+		NewGate->type = type;
 
 		// Based on it's type we can easily decifer how many inputs and outputs the gate will have.
 		if (type < 2) {
-			(*Indirect)->NumOfIn = 1;
-			(*Indirect)->NumOfOut = 1;
-		}
-		else if (type < 7) {
-			(*Indirect)->NumOfIn = 2;
-			(*Indirect)->NumOfOut = 1;
-		}
-		// A decoder and multiplexer requires a little more work to work out how many ins and outs it has.
-		else {
+			NewGate->NumOfIn = 1;
+			NewGate->NumOfOut = 1;
+		} else if (type < 7) {
+			NewGate->NumOfIn = 2;
+			NewGate->NumOfOut = 1;
+		} else {
 			fscanf(fp, "%d", &inputs);
+
 			if (type == DECODER) {
-				(*Indirect)->NumOfIn = inputs;
-				(*Indirect)->NumOfOut = 1 << inputs;
-			}
-			else {
-				(*Indirect)->NumOfIn = inputs + (1 << inputs);
-				(*Indirect)->NumOfOut = 1;
+				NewGate->NumOfIn = inputs;
+				NewGate->NumOfOut = 1 << inputs;
+			} else {
+				NewGate->NumOfIn = inputs + (1 << inputs);
+				NewGate->NumOfOut = 1;
 			}
 		}
 
@@ -292,10 +287,10 @@ void CreateGates(struct Gate **First, struct VarTable *Table, int *binary, FILE 
 		 * The array will be int pointers so that we can refer to the
 		 * master variable table and quickly pull what value is currently stored there.
 		 */
-		(*Indirect)->inparam = malloc(sizeof(int*) * ((*Indirect)->NumOfIn));
+		NewGate->inparam = malloc(sizeof(int*) * (NewGate->NumOfIn));
 
 		// Scan through the file and store those variables
-		for (i = 0; i < (*Indirect)->NumOfIn; ++i) {
+		for (i = 0; i < NewGate->NumOfIn; ++i) {
 			fscanf(fp, "%16s", BUFFER);
 
 			/*
@@ -303,19 +298,16 @@ void CreateGates(struct Gate **First, struct VarTable *Table, int *binary, FILE 
 			 * This array contains 0, 1, and -1 for their respective symbols.
 			 */
 			if (BUFFER[0] == '0') {
-				(*Indirect)->inparam[i] = &(binary[0]);
-			}
-			else if (BUFFER[0] == '1') {
-				(*Indirect)->inparam[i] = &(binary[1]);
-			}
-			else if (BUFFER[0] == '_') {
-				(*Indirect)->inparam[i] = &(binary[2]);
-			}
-			else {
+				NewGate->inparam[i] = &(binary[0]);
+			} else if (BUFFER[0] == '1') {
+				NewGate->inparam[i] = &(binary[1]);
+			} else if (BUFFER[0] == '_') {
+				NewGate->inparam[i] = &(binary[2]);
+			} else {
 				for (j = 0; j < Table->TempEnd; ++j) {
 					// Look for the Variable, if we find it, set the pointer and stop.
 					if (!StrComp(BUFFER, Table->Vars[j].VarName)) {
-						(*Indirect)->inparam[i] = &(Table->Vars[j].value);
+						NewGate->inparam[i] = &(Table->Vars[j].value);
 						break;
 					}
 				}
@@ -323,25 +315,22 @@ void CreateGates(struct Gate **First, struct VarTable *Table, int *binary, FILE 
 		}
 
 		// Allocate space for pointers to our output variables using the same ideas as above.
-		(*Indirect)->outparam = malloc(sizeof(int*) * ((*Indirect)->NumOfOut));
+		NewGate->outparam = malloc(sizeof(int*) * (NewGate->NumOfOut));
 
-		for (i = 0; i < (*Indirect)->NumOfOut; ++i) {
+		for (i = 0; i < NewGate->NumOfOut; ++i) {
 			fscanf(fp, "%16s", BUFFER);
 
 			if (BUFFER[0] == '0') {
-				(*Indirect)->outparam[i] = &(binary[0]);
-			}
-			else if (BUFFER[0] == '1') {
-				(*Indirect)->outparam[i] = &(binary[1]);
-			}
-			else if (BUFFER[0] == '_') {
-				(*Indirect)->outparam[i] = &(binary[2]);
-			}
-			else {
+				NewGate->outparam[i] = &(binary[0]);
+			} else if (BUFFER[0] == '1') {
+				NewGate->outparam[i] = &(binary[1]);
+			} else if (BUFFER[0] == '_') {
+				NewGate->outparam[i] = &(binary[2]);
+			} else {
 				for (j = 0; j < Table->TempEnd; ++j) {
 					// Look for the Variable, if we find it, set the pointer and stop.
 					if (!StrComp(BUFFER, Table->Vars[j].VarName)) {
-						(*Indirect)->outparam[i] = &(Table->Vars[j].value);
+						NewGate->outparam[i] = &(Table->Vars[j].value);
 						break;
 					}
 				}
@@ -353,10 +342,10 @@ void CreateGates(struct Gate **First, struct VarTable *Table, int *binary, FILE 
 		 * the Multiplexer, not total amount of inputs.
 		 */
 		if (type == MULTIPLEXER)
-			(*Indirect)->NumOfIn -= 1 << inputs;
+			NewGate->NumOfIn -= 1 << inputs;
 
 		// Once finished, move on to the next directive.
-		Indirect = &((*Indirect)->next);
+		Indirect = &(NewGate->next);
 	}
 }
 
@@ -425,8 +414,7 @@ void DoCircuit(struct Gate *First, struct VarTable *Table)
 		case AND:
 			if (*First->inparam[0] == 1 && *First->inparam[1] == 1) {
 				*First->outparam[0] = 1;
-			}
-			else {
+			} else {
 				if (*First->outparam[0] != -1)
 					*First->outparam[0] = 0;
 			}
@@ -435,8 +423,7 @@ void DoCircuit(struct Gate *First, struct VarTable *Table)
 		case NAND:
 			if (*First->inparam[0] == 1 && *First->inparam[1] == 1) {
 				*First->outparam[0] = 0;
-			}
-			else {
+			} else {
 				if (*First->outparam[0] != -1)
 					*First->outparam[0] = 1;
 			}
@@ -446,8 +433,7 @@ void DoCircuit(struct Gate *First, struct VarTable *Table)
 		case NOR:
 			if (*First->inparam[0] == 1 || *First->inparam[1] == 1) {
 				*First->outparam[0] = 0;
-			}
-			else {
+			} else {
 				if (*First->outparam[0] != -1)
 					*First->outparam[0] = 1;
 			}
@@ -457,8 +443,7 @@ void DoCircuit(struct Gate *First, struct VarTable *Table)
 		case OR:
 			if (*First->inparam[0] == 1 || *First->inparam[1] == 1) {
 				*First->outparam[0] = 1;
-			}
-			else {
+			} else {
 				if (*First->outparam[0] != -1)
 					*First->outparam[0] = 0;
 			}
@@ -469,8 +454,8 @@ void DoCircuit(struct Gate *First, struct VarTable *Table)
 			if ((*First->inparam[0] == 1 && *First->inparam[1] == 0) ||
 				(*First->inparam[0] == 0 && *First->inparam[1] == 1)) {
 				*First->outparam[0] = 1;
-			}
-			else {
+
+			} else {
 				if (*First->outparam[0] != -1)
 					*First->outparam[0] = 0;
 			}
@@ -544,8 +529,7 @@ swapped:
 							*First = *swap;
 							*swap = tmp;
 							break;
-						}
-						else {
+						} else {
 							swap = &((*swap)->next);
 						}
 					}
@@ -578,15 +562,17 @@ void Solve_Truth_Table(struct Gate *First, struct VarTable *Table)
 	 */
 	for (i = start; i >= 0; --i) {
 
-		// If the current variable is a 0, flip it to 1 and reset back to the first var.
+		/*
+		 * If the current variable is a 0, flip it to 1 and reset back to the first var.
+		 * else if the current variable is a 1, we can flip the bit and move to
+		 * next bit as if we were to "carry"
+		 */
 		if (Table->Vars[i].value == 0) {
 			Table->Vars[i].value = 1;
 			i = start + 1;
-		}
-
-		// If the current variable is a 1, we can flip the bit and move to next var as if we were to "carry" in addition
-		else if (Table->Vars[i].value == 1)
+		} else if (Table->Vars[i].value == 1) {
 			Table->Vars[i].value = 0;
+		}
 
 		// If we did flip a bit and restart, that means we have yet to get to the last bit so do the circuit.
 		if (i == start + 1) {
