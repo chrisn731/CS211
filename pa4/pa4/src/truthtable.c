@@ -186,7 +186,7 @@ void Search_For_Temps(struct VarTable *Table, FILE *fp)
 		 * Go through our current Variables and see if we already have that Variable.
 		 * If not, append it to our table.
 		 */
-		for (i = 0; i < (NumOfIn + NumOfOut); ++i) {
+		for (i = 0; i < NumOfIn + NumOfOut; ++i) {
 			fscanf(fp, "%16s", BUFFER);
 			if (BUFFER[0] != '1' && BUFFER[0] != '0' && BUFFER[0] != '_') {
 				for (j = 0; j < Table->TempEnd; ++j) {
@@ -199,7 +199,7 @@ void Search_For_Temps(struct VarTable *Table, FILE *fp)
 					StrCopy(BUFFER, Table->Vars[Table->TempEnd].VarName);
 					Table->Vars[Table->TempEnd].index = Table->TempEnd;
 					Table->Vars[Table->TempEnd].value = 0;
-					++(Table->TempEnd);
+					Table->TempEnd++;
 				}
 			}
 		}
