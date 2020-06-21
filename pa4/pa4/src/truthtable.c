@@ -172,8 +172,7 @@ void Search_For_Temps(struct VarTable *Table, FILE *fp)
 
 			if (BUFFER[0] == 'D') {
 				NumOfOut = 1 << NumOfIn;
-			}
-			else {
+			} else {
 				NumOfOut = 1;
 				NumOfIn += 1 << NumOfIn;
 			}
@@ -287,7 +286,7 @@ void CreateGates(struct Gate **First, struct VarTable *Table, int *binary, FILE 
 		 * The array will be int pointers so that we can refer to the
 		 * master variable table and quickly pull what value is currently stored there.
 		 */
-		NewGate->inparam = malloc(sizeof(int*) * (NewGate->NumOfIn));
+		NewGate->inparam = malloc(NewGate->NumOfIn * sizeof(int *));
 
 		// Scan through the file and store those variables
 		for (i = 0; i < NewGate->NumOfIn; ++i) {
@@ -315,7 +314,7 @@ void CreateGates(struct Gate **First, struct VarTable *Table, int *binary, FILE 
 		}
 
 		// Allocate space for pointers to our output variables using the same ideas as above.
-		NewGate->outparam = malloc(sizeof(int*) * (NewGate->NumOfOut));
+		NewGate->outparam = malloc(NewGate->NumOfOut * sizeof(int *));
 
 		for (i = 0; i < NewGate->NumOfOut; ++i) {
 			fscanf(fp, "%16s", BUFFER);
@@ -485,13 +484,12 @@ void DoCircuit(struct Gate *First, struct VarTable *Table)
  */
 void SortGates(struct Gate **First, struct VarTable *Table)
 {
-	int i, j, found, NumOfIn;
+	int i, j, NumOfIn;
 	int *TempAddr, *TableAddr;
 	struct Gate **swap;
 
 swapped:
 	while (*First != NULL) {
-		found = 0;
 
 		if ((*First)->type == MULTIPLEXER)
 			NumOfIn = (*First)->NumOfIn + (1 << (*First)->NumOfIn);
@@ -506,13 +504,13 @@ swapped:
 
 				if (TempAddr == TableAddr) {
 
+					int k, found = 0;
+
 					//Flag the temp Variable
 					Table->Vars[j].value = 1;
 					swap = &((*First)->next);
 
 					while (*swap != NULL) {
-
-						int k;
 
 						for (k = 0; k < ((*swap)->NumOfOut); ++k) {
 							if (*(*swap)->outparam[k] == 1) {
@@ -542,7 +540,6 @@ swapped:
 				}
 			}
 		}
-
 		First = &((*First)->next);
 	}
 }
