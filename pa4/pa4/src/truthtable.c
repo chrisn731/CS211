@@ -451,7 +451,7 @@ void DoCircuit(struct Gate *First, struct VarTable *Table)
 
 		case XOR:
 			if ((*First->inparam[0] == 1 && *First->inparam[1] == 0) ||
-				(*First->inparam[0] == 0 && *First->inparam[1] == 1)) {
+			    (*First->inparam[0] == 0 && *First->inparam[1] == 1)) {
 				*First->outparam[0] = 1;
 
 			} else {
